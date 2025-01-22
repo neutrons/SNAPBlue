@@ -1,0 +1,10 @@
+name: PE std
+id: 1
+type: PE cell
+anvilMaterial: ZTA
+anvilType: st
+gasketMaterial: TiZr
+gasketType: st_Encapsulating
+attenuationModel: 'cylindrical'
+pixelMasks: ['LetterBox_horiz.xml']
+

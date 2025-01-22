@@ -1,0 +1,4 @@
+defaultUnfocussedWorkspaceUnits: dSpacing
+keepUnfocussed: false
+pixelMasks: []
+useLiteMode: true
