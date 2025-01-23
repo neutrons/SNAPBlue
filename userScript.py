@@ -6,5 +6,5 @@ importlib.reload(blue)
 
 #to do a simple reduction of run 61991
 
-blue.reduceSNAP(61991) 
+blue.reduceSNAP(61991,sampleEnv="PE_001") 
 

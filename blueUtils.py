@@ -12,10 +12,14 @@ class globalParams:
         with open(defaultYML,'r') as file:
             ymlIn = yaml.safe_load(file)
 
+        self.continueFlags = ymlIn["continueFlags"]
         self.useLiteMode = ymlIn["useLiteMode"]
         self.pixelMasks = ymlIn["pixelMasks"]
         self.keepUnfocussed = ymlIn["keepUnfocussed"]
         self.convertUnitsTo = ymlIn["defaultUnfocussedWorkspaceUnits"]
+        self.AN_smoothingParameter = ymlIn["artificialNorm"]["smoothingParameter"]
+        self.AN_decreaseParameter = ymlIn["artificialNorm"]["decreaseParameter"]
+        self.AN_lss = ymlIn["artificialNorm"]["lss"]
 
         return
     
@@ -35,15 +39,16 @@ def makeDefaultYML(outputYML):
 
 def makeSEE(outputName,SEEDirectory):
 
-    #TODO: make function to initialise SEE definition with mandatory inputs
+    #TODO: make function to initialise SEE (=  Sample Environment Equipment) definition with mandatory inputs
     ymlOut = SEEDirectory + outputName
     return ymlOut 
 
-def loadSEE(seeDefinition):
+def loadSEE(seeDefinition,SEEFolder):
+
+    #loads Parameters from SEE definition as a dictionary
 
     #TODO: add this to application.yml
-    defaultSEEDir = '/SNS/SNAP/shared/Calibration_next/SimpleContainers/'
-    inputYML = f"{defaultSEEDir}{seeDefinition}.yml"
+    inputYML = f"{SEEFolder}/{seeDefinition}.yml"
 
     #TODO: manage errors when file doesn't exist etc.
     with open(inputYML,'r') as file:
@@ -51,7 +56,7 @@ def loadSEE(seeDefinition):
 
     return seeDict
 
-def reduceSNAP(runNumber,sampleEnv='none',mask='none'):
+def reduceSNAP(runNumber,sampleEnv='none',pixelMask='none',defaultYMLOverride='none'):
 
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     # SNAPRed imports
@@ -68,100 +73,56 @@ def reduceSNAP(runNumber,sampleEnv='none',mask='none'):
     from rich import print as printRich
 
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    # other imports (e.g. our own utilties)
+    # load reduction params from default yml with option to override 
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    # import sys
-    # import importlib
-    # sys.path.append("/SNS/SNAP/shared/Malcolm/code/SNAPBlue")
-    # import blueUtils as blue
-    # importlib.reload(blue)
+    #TODO: update default to final shared repo path
 
-    # import argparse
+    if defaultYMLOverride == 'none':
+        defaultYML = "/SNS/SNAP/shared/Malcolm/code/SNAPBlue/defaultRedConfig.yml" #this will live in repo
+    else:
+        defaultYML = defaultYMLOverride
 
-    ######################HERE ARE THE INPUT PARAMS###################################
+    blueGlob = globalParams(defaultYML)
 
-    # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    # load default reduction params from yml instead of script
-    # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-    defaultYML = "/SNS/SNAP/shared/Malcolm/code/SNAPBlue/defaultRedConfig.yml"
-    blueGlob = globalParams("/SNS/SNAP/shared/Malcolm/code/SNAPBlue/defaultRedConfig.yml")
+    #set obal parameters
     useLiteMode=blueGlob.useLiteMode
     pixelMasks = blueGlob.pixelMasks
     keepUnfocused = blueGlob.keepUnfocussed
     convertUnitsTo = blueGlob.convertUnitsTo
-
-    # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    # define primary inputs and overrides using argparse
-    # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-    # parser = argparse.ArgumentParser(description="Reduce SNAP data")
-
-    # # run number. mandatory. TODO: allow this to be a list
-    # parser.add_argument('runString', help='run number to reduce (for now single run at a time)')
-
-    # # add optional arguments here
-    # parser.add_argument(
-    #         "-m",
-    #         "--mask",  # Optional (but recommended) long version
-    #         type=str,
-    #         default="none",
-    #         help = 'name of pixel mask workspace [TODO: allow for mask files?]'
-    #         )
-
-    # parser.add_argument(
-    #         "-s",
-    #         "--sampleEnv",  # Optional (but recommended) long version
-    #         type=str,
-    #         default="none",
-    #         help = 'name of sample environment definition file (without extension)'
-    #         )
-
-    # args = parser.parse_args()
-    runNumber = str(runNumber)
-
-    # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    #  Now proceed to set up orchestration
-    # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-    # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    # when requested load additional config options
-    # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-    #case 1: SEE definition provided. These will be YML stored in a specific 
-    #location that contain as many pre-specified parameters as possible
-    #for a given SEE set-up
-
-    if sampleEnv != 'none':
-        seeDict = oadSEE(ampleEnv)
-
-    if mask != 'none':
-        pixelMasks = mask
-
-
-    # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    # default exception handling TODO: move to yml
-    # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
+    #set default continue flags
     # This is a bitwise flag you can update to say whether or not you are fine with
     # 1. missing calibration
     # 2. aritifical normalization
     # 3. missing normalization
     # 4. etc.
-    # 
-    #  e.g. continueFlags = ContinueWarning.Type.MISSING_CALIBRATION | ContinueWarning.Type.MISSING_NORMALIZATION
-    continueFlags = ContinueWarning.Type.UNSET  
-    # continueFlags = ContinueWarning.Type.MISSING_NORMALIZATION
+    # continueFlags = blueGlob.continueFlags
+    continueFlags = ContinueWarning.Type.MISSING_NORMALIZATION 
 
-    artificialNormalizationIngredients = None
+    # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    # process input arguments
+    # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    # NOTE: Uncomment if you want to perform aritificial normalization
+    runNumber = str(runNumber)
+    SEEFolder = f'{Config["instrument.calibration.home"]}/sampleEnvironmentDefinitions'
+
+    if sampleEnv != 'none':
+        seeDict = loadSEE(sampleEnv,SEEFolder)
+        if seeDict["masks"]["maskExists"] and (seeDict["masks"]["maskType"]=="static"):
+            # TODO: need to separately manage lite versus non lite masks
+            # TODO: mantid can't load lite masks ... need to use SNAPRed
+            pass
+
+    if pixelMask != 'none':
+        pixelMasks.append(pixelMask)
+
+#    artificialNormalizationIngredients = None
+
     artificialNormalizationIngredients = ArtificialNormalizationIngredients(
         peakWindowClippingSize = Config["constants.ArtificialNormalization.peakWindowClippingSize"],
-        smoothingParameter=0.5,
-        decreaseParameter=True,
-        lss=True
+        smoothingParameter=blueGlob.AN_smoothingParameter,
+        decreaseParameter=blueGlob.AN_decreaseParameter,
+        lss=blueGlob.AN_lss
     )
 
     reductionService = ReductionService()
@@ -264,15 +225,15 @@ def reduceSNAP(runNumber,sampleEnv='none',mask='none'):
                 - name: {seeDict["name"]}
                 - id: {seeDict["id"]}
                 - type: {seeDict["type"]}
-                - mask: {seeDict["pixelMasks"]}
+                - mask: {seeDict["masks"]["maskFilenameList"]} NOT YET IMPLEMENTED
             
             """)
 
-    if mask != 'none':
+    if pixelMask != 'none':
         print(f"""
             Mask workspace was specified.
 
-            Mask workspace name: {args.mask}
+            Mask workspace name: {pixelMask}
             
             """)
 

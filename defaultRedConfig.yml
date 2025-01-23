@@ -1,4 +1,10 @@
+continueFlags: ContinueWarning.Type.MISSING_CALIBRATION | ContinueWarning.Type.MISSING_NORMALIZATION 
 defaultUnfocussedWorkspaceUnits: dSpacing
 keepUnfocussed: false
 pixelMasks: []
 useLiteMode: true
+artificialNorm:
+  smoothingParameter: 0.5
+  decreaseParameter: true
+  lss: true
+  
