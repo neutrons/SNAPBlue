@@ -56,7 +56,11 @@ def loadSEE(seeDefinition,SEEFolder):
 
     return seeDict
 
-def reduceSNAP(runNumber,sampleEnv='none',pixelMask='none',defaultYMLOverride='none'):
+def reduceSNAP(runNumber,
+               sampleEnv='none',
+               pixelMask='none',
+               defaultYMLOverride='none',
+               verbose=False):
 
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     # SNAPRed imports
@@ -72,6 +76,14 @@ def reduceSNAP(runNumber,sampleEnv='none',pixelMask='none',defaultYMLOverride='n
     from snapred.meta.Config import Config
     from rich import print as printRich
 
+    from mantid import config
+
+    if verbose:
+        config.setLogLevel(0, quiet=True)
+    else:
+        config.setLogLevel(3, quiet=True)
+
+    print("SNAPBlue: gathering reduction ingredients...\n")
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     # load reduction params from default yml with option to override 
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -213,6 +225,7 @@ def reduceSNAP(runNumber,sampleEnv='none',pixelMask='none',defaultYMLOverride='n
 
             - Normalisation Calibration:
                 - raw vanadium path: {normalizationPath}
+                - raw vanadium version: {normalizationRecord.version}
 
         """)
 
@@ -255,4 +268,7 @@ def reduceSNAP(runNumber,sampleEnv='none',pixelMask='none',defaultYMLOverride='n
     )
 
     reductionService.saveReduction(saveReductionRequest)
+
+    #return logging to normal
+    config.setLogLevel(3, quiet=True)
 

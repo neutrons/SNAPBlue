@@ -1,4 +1,4 @@
-continueFlags: ContinueWarning.Type.MISSING_CALIBRATION | ContinueWarning.Type.MISSING_NORMALIZATION 
+continueFlags: ['MISSING_CALIBRATION','MISSING_NORMALIZATION'] #default behaviour will continue in these cases 
 defaultUnfocussedWorkspaceUnits: dSpacing
 keepUnfocussed: false
 pixelMasks: []
