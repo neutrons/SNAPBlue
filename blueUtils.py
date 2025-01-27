@@ -184,6 +184,7 @@ def reduceSNAP(runNumber,
     # Determine calibration status and process this
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+
     dataFactoryService = DataFactoryService()
     calibrationPath = dataFactoryService.getCalibrationDataPath(
                 runNumber, useLiteMode, VersionState.LATEST
@@ -193,8 +194,15 @@ def reduceSNAP(runNumber,
                 runNumber, useLiteMode, VersionState.LATEST
             )
     
-    if type(calibrationRecord.version) == None:
-        print("NO DIFFRACTION CALIBRATION")
+    if type(calibrationRecord.version) and not continueNoDifcal:
+        print("""         
+                 
+          - WARNING: NO DIFFRACTION CALIBRATION FOUND. TO PROCEED EITHER:
+              1. RUN A DIFFRACTION CALIBRATION OR 
+              2. SET "continueNoDifCal = True" TO PROCEED WITH DEFAULT GEOMETRY
+
+            """)
+        assert False
 
     # print(calibrationRecord.version)
     normalizationPath = dataFactoryService.getNormalizationDataPath(
@@ -208,12 +216,9 @@ def reduceSNAP(runNumber,
     if type(normalizationRecord) == None:
         print("""         
                  
-          - WARNING: NO VANADIUM FOUND. TO PROCEED RUN A VANADIUM CALIBRATION OR
-            SET 
-              
-              continueNoVan = True
-
-            TO PROCEED WITH ARTIFICIAL NORMALISATION
+          - WARNING: NO VANADIUM FOUND. TO PROCEED EITHER: 
+              1. RUN A VANADIUM CALIBRATION OR 
+              2. SET "continueNoVan = True" TO USE ARTIFICIAL NORMALISATION
 
             """)
         
@@ -245,10 +250,10 @@ def reduceSNAP(runNumber,
 
         """)
     
-    if continueNoDifcal:
+    if calibrationRecord.version==0 and continueNoDifcal:
         print("""
 
-          - WARNING: NO DIFFRACTION CALIBRATION AVAILABLE! DEFAULT GEOMETRY WILL BE USED.
+          - WARNING: DIAGNOSTIC MODE! DEFAULT GEOMETRY USED.
 
               """)
     else:
@@ -263,7 +268,7 @@ def reduceSNAP(runNumber,
     if continueNoVan:
         print("""         
                  
-          - WARNING: DIAGNOSTIC MODE! VANADIUM CORRECTION WILL NO BE USED
+          - WARNING: DIAGNOSTIC MODE! VANADIUM CORRECTION NOT USED
             DATA WILL BE ARTIFICIALLY NORMALISED BY DIVISION BY BACKGROUND.
 
             """)
@@ -317,3 +322,62 @@ def reduceSNAP(runNumber,
     #return logging to normal
     config.setLogLevel(3, quiet=True)
 
+
+    print(f"""
+        Reduction COMPLETE
+
+            - Run Number: {ingredients.runNumber}
+
+            - state: 
+                - ID: {stateID[0]},
+                - definition: {stateID[1]}
+
+            - Pixel Groups to process: {allPixelGroups}
+
+        """)
+    
+    if calibrationRecord.version==0 and continueNoDifcal:
+        print("""
+          - WARNING: DIAGNOSTIC MODE! DEFAULT GEOMETRY USED TO CONVERT UNITS.
+              """)
+    else:
+        print(f"""
+          Calibration Status:
+            - Diffraction Calibration:
+                - .h5 path: {calibrationPath}
+                - .h5 version: {calibrationRecord.version}
+
+    """)
+
+    if continueNoVan:
+        print("""         
+          - WARNING: DIAGNOSTIC MODE! VANADIUM CORRECTION NOT USED
+            DATA WILL BE ARTIFICIALLY NORMALISED USING DIVISION BY BACKGROUND
+            """)
+    else:
+        print(f"""            
+                - Normalisation Calibration:
+                    - raw vanadium path: {normalizationPath}
+                    - raw vanadium version: {normalizationRecord.version}
+
+            """)
+
+    #optional arguments provided...
+
+    if sampleEnv != 'none':
+        print(f"""          
+            Sample environment was specified.
+
+                - name: {seeDict["name"]}
+                - id: {seeDict["id"]}
+                - type: {seeDict["type"]}
+                - mask: {seeDict["masks"]["maskFilenameList"]} NOT YET IMPLEMENTED
+            
+            """)
+
+    if pixelMask != 'none':
+        print(f"""
+            Mask workspace was specified.
+
+            Mask workspace name: {pixelMask}
+        """)
