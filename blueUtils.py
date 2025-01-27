@@ -58,7 +58,7 @@ def loadSEE(seeDefinition,SEEFolder):
 def reduceSNAP(runNumber,
                sampleEnv='none',
                pixelMask='none',
-               defaultYMLOverride='none',
+               YMLOverride='none',
                continueNoDifcal = False,
                continueNoVan = False,
                verbose=False):
@@ -80,9 +80,9 @@ def reduceSNAP(runNumber,
     from mantid import config
 
     if verbose:
-        config.setLogLevel(0, quiet=True)
+        config.setLogLevel(5, quiet=True)
     else:
-        config.setLogLevel(3, quiet=True)
+        config.setLogLevel(0, quiet=True)
 
     print("SNAPBlue: gathering reduction ingredients...\n")
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -91,14 +91,14 @@ def reduceSNAP(runNumber,
 
     #TODO: update default to final shared repo path
 
-    if defaultYMLOverride == 'none':
+    if YMLOverride == 'none':
         defaultYML = "/SNS/SNAP/shared/Malcolm/code/SNAPBlue/defaultRedConfig.yml" #this will live in repo
     else:
-        defaultYML = defaultYMLOverride
+        defaultYML = YMLOverride
 
     blueGlob = globalParams(defaultYML)
 
-    #set obal parameters
+    #set global parameters
     useLiteMode=blueGlob.useLiteMode
     pixelMasks = blueGlob.pixelMasks
     keepUnfocused = blueGlob.keepUnfocussed
@@ -119,12 +119,6 @@ def reduceSNAP(runNumber,
         
     else:
         artificialNormalizationIngredients = None
-
-    # for flag in blueGlob.continueFlags:
-    #     if flag == 'MISSING_CALIBRATION':
-    #         override.append('ContinueWarning.Type.MISSING_CALIBRATION')        
-    #     if flag == 'MISSING_NORMALIZATION':
-    #         override.append('ContinueWarning.Type.MISSING_NORMALIZATION')
 
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     # process input arguments
@@ -194,7 +188,7 @@ def reduceSNAP(runNumber,
                 runNumber, useLiteMode, VersionState.LATEST
             )
     
-    if type(calibrationRecord.version) and not continueNoDifcal:
+    if calibrationRecord.version == 0 and not continueNoDifcal:
         print("""         
                  
           - WARNING: NO DIFFRACTION CALIBRATION FOUND. TO PROCEED EITHER:
