@@ -12,7 +12,6 @@ class globalParams:
         with open(defaultYML,'r') as file:
             ymlIn = yaml.safe_load(file)
 
-        self.continueFlags = ymlIn["continueFlags"]
         self.useLiteMode = ymlIn["useLiteMode"]
         self.pixelMasks = ymlIn["pixelMasks"]
         self.keepUnfocussed = ymlIn["keepUnfocussed"]
@@ -60,6 +59,8 @@ def reduceSNAP(runNumber,
                sampleEnv='none',
                pixelMask='none',
                defaultYMLOverride='none',
+               continueNoDifcal = False,
+               continueNoVan = False,
                verbose=False):
 
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -102,14 +103,28 @@ def reduceSNAP(runNumber,
     pixelMasks = blueGlob.pixelMasks
     keepUnfocused = blueGlob.keepUnfocussed
     convertUnitsTo = blueGlob.convertUnitsTo
-    #set default continue flags
-    # This is a bitwise flag you can update to say whether or not you are fine with
-    # 1. missing calibration
-    # 2. aritifical normalization
-    # 3. missing normalization
-    # 4. etc.
-    # continueFlags = blueGlob.continueFlags
-    continueFlags = ContinueWarning.Type.MISSING_NORMALIZATION 
+
+    #process default continue flags
+
+    continueFlags = ContinueWarning.Type.UNSET #by default do not continue
+
+    if continueNoVan:
+        artificialNormalizationIngredients = ArtificialNormalizationIngredients(
+        peakWindowClippingSize = Config["constants.ArtificialNormalization.peakWindowClippingSize"],
+        smoothingParameter=blueGlob.AN_smoothingParameter,
+        decreaseParameter=blueGlob.AN_decreaseParameter,
+        lss=blueGlob.AN_lss
+        )
+        continueFlags = ContinueWarning.Type.MISSING_NORMALIZATION
+        
+    else:
+        artificialNormalizationIngredients = None
+
+    # for flag in blueGlob.continueFlags:
+    #     if flag == 'MISSING_CALIBRATION':
+    #         override.append('ContinueWarning.Type.MISSING_CALIBRATION')        
+    #     if flag == 'MISSING_NORMALIZATION':
+    #         override.append('ContinueWarning.Type.MISSING_NORMALIZATION')
 
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     # process input arguments
@@ -127,15 +142,6 @@ def reduceSNAP(runNumber,
 
     if pixelMask != 'none':
         pixelMasks.append(pixelMask)
-
-#    artificialNormalizationIngredients = None
-
-    artificialNormalizationIngredients = ArtificialNormalizationIngredients(
-        peakWindowClippingSize = Config["constants.ArtificialNormalization.peakWindowClippingSize"],
-        smoothingParameter=blueGlob.AN_smoothingParameter,
-        decreaseParameter=blueGlob.AN_decreaseParameter,
-        lss=blueGlob.AN_lss
-    )
 
     reductionService = ReductionService()
     timestamp = reductionService.getUniqueTimestamp()
@@ -175,7 +181,7 @@ def reduceSNAP(runNumber,
     ingredients.artificialNormalizationIngredients = artificialNormalizationIngredients
 
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    # Additional useful config information
+    # Determine calibration status and process this
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     dataFactoryService = DataFactoryService()
@@ -186,6 +192,10 @@ def reduceSNAP(runNumber,
     calibrationRecord = dataFactoryService.getCalibrationRecord(
                 runNumber, useLiteMode, VersionState.LATEST
             )
+    
+    if type(calibrationRecord.version) == None:
+        print("NO DIFFRACTION CALIBRATION")
+
     # print(calibrationRecord.version)
     normalizationPath = dataFactoryService.getNormalizationDataPath(
                 runNumber, useLiteMode, VersionState.LATEST
@@ -194,6 +204,20 @@ def reduceSNAP(runNumber,
     normalizationRecord = dataFactoryService.getNormalizationRecord(
                 runNumber, useLiteMode, VersionState.LATEST
             )
+    
+    if type(normalizationRecord) == None:
+        print("""         
+                 
+          - WARNING: NO VANADIUM FOUND. TO PROCEED RUN A VANADIUM CALIBRATION OR
+            SET 
+              
+              continueNoVan = True
+
+            TO PROCEED WITH ARTIFICIAL NORMALISATION
+
+            """)
+        
+    
     # print(normalizationRecord.version)
     stateID = dataFactoryService.constructStateId(runNumber)
 
@@ -217,17 +241,40 @@ def reduceSNAP(runNumber,
                 - ID: {stateID[0]},
                 - definition: {stateID[1]}
 
-            - Pixel Groups: {allPixelGroups}
+            - Pixel Groups to process: {allPixelGroups}
 
+        """)
+    
+    if continueNoDifcal:
+        print("""
+
+          - WARNING: NO DIFFRACTION CALIBRATION AVAILABLE! DEFAULT GEOMETRY WILL BE USED.
+
+              """)
+    else:
+        print(f"""
+          Calibration Status:
             - Diffraction Calibration:
                 - .h5 path: {calibrationPath}
                 - .h5 version: {calibrationRecord.version}
 
-            - Normalisation Calibration:
-                - raw vanadium path: {normalizationPath}
-                - raw vanadium version: {normalizationRecord.version}
+    """)
 
-        """)
+    if continueNoVan:
+        print("""         
+                 
+          - WARNING: DIAGNOSTIC MODE! VANADIUM CORRECTION WILL NO BE USED
+            DATA WILL BE ARTIFICIALLY NORMALISED BY DIVISION BY BACKGROUND.
+
+            """)
+    else:
+        print(f"""            
+                - Normalisation Calibration:
+                    - raw vanadium path: {normalizationPath}
+                    - raw vanadium version: {normalizationRecord.version}
+
+            """)
+
 
     #optional arguments provided...
 
@@ -249,8 +296,6 @@ def reduceSNAP(runNumber,
             Mask workspace name: {pixelMask}
             
             """)
-
-    continueInstruction = input("enter anything to continue")
 
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     # Execute reduction here

@@ -1,4 +1,3 @@
-continueFlags: ['MISSING_CALIBRATION','MISSING_NORMALIZATION'] #default behaviour will continue in these cases 
 defaultUnfocussedWorkspaceUnits: dSpacing
 keepUnfocussed: false
 pixelMasks: []
