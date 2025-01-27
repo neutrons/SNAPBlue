@@ -1,5 +1,6 @@
 # some helpful functions for use with SNAPRed script version
 import yaml
+from mantid.simpleapi import *
 
 class globalParams:
 
@@ -147,9 +148,7 @@ def reduceSNAP(runNumber,
             else:
                 maskName = (wng.reductionUserPixelMask().numberTag(maskIndex)).build()
 
-            try:
-                ws = mtd[maskName] #will except if doesn't exist
-            except:
+            if maskName not in mtd.getObjectNames():
                 print(f"ERROR: you requested mask workspace {maskName} but this doesn\'t exist")
                 assert False
             pixelMasks.append(maskName)
@@ -305,13 +304,14 @@ def reduceSNAP(runNumber,
             
             """)
 
-    if pixelMask != 'none':
+    if pixelMasks != 'none' or []:
         print(f"""
-            Mask workspace was specified.
-
-            Mask workspace name: {pixelMask}
-            
-            """)
+            Mask workspace(s) specified:
+        """)
+        for mask in pixelMasks:
+            print(f"""
+                {mask}
+                  """)
 
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     # Execute reduction here
@@ -386,10 +386,12 @@ def reduceSNAP(runNumber,
             
             """)
 
-    if pixelMask != 'none':
+    if pixelMasks != 'none' or []:
         print(f"""
-            Mask workspace was specified.
-
-            Mask workspace name: {pixelMask}
+            Mask workspace(s) specified:
         """)
+        for mask in pixelMasks:
+            print(f"""
+                {mask}
+                  """)
 
