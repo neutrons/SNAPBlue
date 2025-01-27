@@ -27,8 +27,8 @@ config.setLogLevel(3, quiet=True)
 #     )
 
 #example using override yml
-
 blue.reduceSNAP(61991,
-    YMLOverride = "/SNS/SNAP/shared/Malcolm/code/SNAPBlue/override.yml" # set to retain unfocussed ws
+    YMLOverride = "/SNS/SNAP/shared/Malcolm/code/SNAPBlue/override.yml", # set to retain unfocussed ws
+    pixelMaskIndex = 2
     )
 

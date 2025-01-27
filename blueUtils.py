@@ -57,7 +57,7 @@ def loadSEE(seeDefinition,SEEFolder):
 
 def reduceSNAP(runNumber,
                sampleEnv='none',
-               pixelMask='none',
+               pixelMaskIndex='none',
                YMLOverride='none',
                continueNoDifcal = False,
                continueNoVan = False,
@@ -74,6 +74,7 @@ def reduceSNAP(runNumber,
     from snapred.backend.recipe.ReductionRecipe import ReductionRecipe
     from snapred.backend.service.ReductionService import ReductionService
     from snapred.backend.dao.indexing.Versioning import Version, VersionState
+    from snapred.meta.mantid.WorkspaceNameGenerator import WorkspaceNameGenerator as wng
     from snapred.meta.Config import Config
     from rich import print as printRich
 
@@ -101,11 +102,10 @@ def reduceSNAP(runNumber,
     #set global parameters
     useLiteMode=blueGlob.useLiteMode
     pixelMasks = blueGlob.pixelMasks
-    keepUnfocused = blueGlob.keepUnfocussed
+    keepUnfocussed = blueGlob.keepUnfocussed
     convertUnitsTo = blueGlob.convertUnitsTo
 
-    #process default continue flags
-
+    #process continue flags
     continueFlags = ContinueWarning.Type.UNSET #by default do not continue
 
     if continueNoVan:
@@ -129,14 +129,31 @@ def reduceSNAP(runNumber,
 
     if sampleEnv != 'none':
         seeDict = loadSEE(sampleEnv,SEEFolder)
+
         if seeDict["masks"]["maskExists"] and (seeDict["masks"]["maskType"]=="static"):
             # TODO: need to separately manage lite versus non lite masks
             # TODO: mantid can't load lite masks ... need to use SNAPRed
             pass
 
-    if pixelMask != 'none':
-        pixelMasks.append(pixelMask)
+    if pixelMaskIndex != 'none':
+        #check that provided value is a list convert if it isn't
+        if type(pixelMaskIndex) is not list:
+            pixelMaskIndex = [pixelMaskIndex]
 
+        #check that all requested masks actually exist
+        for maskIndex in pixelMaskIndex:
+            if maskIndex == 0: #account for weird mantid indexing by getting rid of zero 
+                maskName = (wng.reductionUserPixelMask().numberTag(1)).build()
+            else:
+                maskName = (wng.reductionUserPixelMask().numberTag(maskIndex)).build()
+
+            try:
+                ws = mtd[maskName] #will except if doesn't exist
+            except:
+                print(f"ERROR: you requested mask workspace {maskName} but this doesn\'t exist")
+                assert False
+            pixelMasks.append(maskName)
+    
     reductionService = ReductionService()
     timestamp = reductionService.getUniqueTimestamp()
 
@@ -146,7 +163,7 @@ def reduceSNAP(runNumber,
         timestamp=timestamp,
         continueFlags=continueFlags,
         pixelMasks=pixelMasks,
-        keepUnfocused=keepUnfocused,
+        keepUnfocused=keepUnfocussed,
         convertUnitsTo=convertUnitsTo,
         artificialNormalizationIngredients=artificialNormalizationIngredients
     )
@@ -350,9 +367,9 @@ def reduceSNAP(runNumber,
             """)
     else:
         print(f"""            
-                - Normalisation Calibration:
-                    - raw vanadium path: {normalizationPath}
-                    - raw vanadium version: {normalizationRecord.version}
+            - Normalisation Calibration:
+                - raw vanadium path: {normalizationPath}
+                - raw vanadium version: {normalizationRecord.version}
 
             """)
 
@@ -375,3 +392,4 @@ def reduceSNAP(runNumber,
 
             Mask workspace name: {pixelMask}
         """)
+
