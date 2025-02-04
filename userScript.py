@@ -23,12 +23,23 @@ config.setLogLevel(3, quiet=True)
     
 
 # #example run with full calibration
+
 # blue.reduceSNAP(61991,
 #     )
 
 #example using override yml
-blue.reduceSNAP(61991,
-    YMLOverride = "/SNS/SNAP/shared/Malcolm/code/SNAPBlue/override.yml", # set to retain unfocussed ws
-    pixelMaskIndex = [2]
+
+# blue.reduceSNAP(61991,
+#     YMLOverride = "/SNS/SNAP/shared/Malcolm/code/SNAPBlue/override.yml", # set to retain unfocussed ws
+#     pixelMaskIndex = [2]
+#     )
+
+#example of (verbose) inspection of parameters but not actually reducing anything
+
+blue.reduceSNAP(58882,
+    verbose=True,
+    continueNoVan=True,
+    continueNoDifcal=True,
+    reduceData=False
     )
 

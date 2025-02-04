@@ -1,6 +1,8 @@
 # some helpful functions for use with SNAPRed script version
 import yaml
 from mantid.simpleapi import *
+from mantid.kernel import PhysicalConstants
+import numpy as np
 
 class globalParams:
 
@@ -62,7 +64,9 @@ def reduceSNAP(runNumber,
                YMLOverride='none',
                continueNoDifcal = False,
                continueNoVan = False,
-               verbose=False):
+               verbose=False,
+               reduceData=True,
+               cisMode=False):
 
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     # SNAPRed imports
@@ -77,6 +81,12 @@ def reduceSNAP(runNumber,
     from snapred.backend.dao.indexing.Versioning import Version, VersionState
     from snapred.meta.mantid.WorkspaceNameGenerator import WorkspaceNameGenerator as wng
     from snapred.meta.Config import Config
+    # from snapred.backend.data import LocalDataService as lds
+    from snapred.backend.dao.request.FarmFreshIngredients import FarmFreshIngredients
+    from snapred.backend.service.SousChef import SousChef
+    
+
+
     from rich import print as printRich
 
     from mantid import config
@@ -85,6 +95,12 @@ def reduceSNAP(runNumber,
         config.setLogLevel(5, quiet=True)
     else:
         config.setLogLevel(0, quiet=True)
+
+
+    if cisMode:
+        Config._config['cis_mode'] = True
+    else:
+        Config._config['cis_mode'] = False
 
     print("SNAPBlue: gathering reduction ingredients...\n")
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -182,6 +198,10 @@ def reduceSNAP(runNumber,
     groceries = reductionService.fetchReductionGroceries(reductionRequest)
     groceries["groupingWorkspaces"] = groupings["groupingWorkspaces"]
 
+    print(groceries["inputWorkspace"])
+
+    
+
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     #  Load the metadata i.e. ingredients
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -248,17 +268,19 @@ def reduceSNAP(runNumber,
                 allPixelGroups.append(item.focusGroup.name)
 
     print(f"""
-        SNAPRed:
+            SNAPRed:
 
-            - Run Number: {ingredients.runNumber}
+                - Run Number: {ingredients.runNumber}
 
-            - state: 
-                - ID: {stateID[0]},
-                - definition: {stateID[1]}
+                - state: 
+                    - ID: {stateID[0]},
+                    - definition: {stateID[1]}
 
-            - Pixel Groups to process: {allPixelGroups}
+                - Pixel Groups to process: {allPixelGroups}
 
-        """)
+            """)
+    
+    
     
     if calibrationRecord.version==0 and continueNoDifcal:
         print("""
@@ -313,28 +335,54 @@ def reduceSNAP(runNumber,
                 {mask}
                   """)
 
-    # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    # Execute reduction here
-    # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    #obtain useful values from instrument state
 
-    data = ReductionRecipe().cook(ingredients, groceries)
-    record = reductionService._createReductionRecord(reductionRequest, ingredients, data["outputs"])
+        farmFresh = FarmFreshIngredients(
+        runNumber=runNumber,
+        useLiteMode=useLiteMode,
+        focusGroups=[{"name":"All", "definition":""}],
+        )
+        instrumentState = SousChef().prepInstrumentState(farmFresh)
 
-    # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    #  Save the data
-    # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    if reduceData:
 
-    saveReductionRequest = ReductionExportRequest(
-        record=record
-    )
+        # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        #  Crop data in wavelength space prior to reduction
+        #  This was used while troubleshooting spectral edges
+        #
+        # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    reductionService.saveReduction(saveReductionRequest)
+        # ConvertUnits(InputWorkspace=groceries["inputWorkspace"],
+        #             OutputWorkspace=groceries["inputWorkspace"],
+        #             Target="Wavelength")
+        
+        # CropWorkspace(InputWorkspace=groceries["inputWorkspace"],
+        #             OutputWorkspace=groceries["inputWorkspace"],
+        #             XMin = instrumentState.particleBounds.wavelength.minimum,
+        #             XMax = instrumentState.particleBounds.wavelength.maximum)
+        
+        # ConvertUnits(InputWorkspace=groceries["inputWorkspace"],
+        #             OutputWorkspace=groceries["inputWorkspace"],
+        #             Target="TOF")
 
-    #return logging to normal
-    config.setLogLevel(3, quiet=True)
 
+        # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        # Execute reduction here
+        # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    print(f"""
+        data = ReductionRecipe().cook(ingredients, groceries)
+        record = reductionService._createReductionRecord(reductionRequest, ingredients, data["outputs"])
+
+        # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        #  Save the data
+        # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+        saveReductionRequest = ReductionExportRequest(
+            record=record
+        )
+
+        reductionService.saveReduction(saveReductionRequest)
+        print(f"""
         Reduction COMPLETE
 
             - Run Number: {ingredients.runNumber}
@@ -394,4 +442,118 @@ def reduceSNAP(runNumber,
             print(f"""
                 {mask}
                   """)
+
+
+    if verbose:
+
+        
+
+        print("\nINSTRUMENT PARAMETERS")
+        print(f"- Calib.home: {Config['instrument.calibration.home']}")
+        # print("\nParams in SNAPInstPrm:")
+        print("- L1: ",instrumentState.instrumentConfig.L1)
+        print("- L2: ",instrumentState.instrumentConfig.L2)
+        L = instrumentState.instrumentConfig.L1+instrumentState.instrumentConfig.L2
+        print("- bandwidth: ",instrumentState.instrumentConfig.bandwidth)
+        print("- lowWavelengthCrop: ",instrumentState.instrumentConfig.lowWavelengthCrop)
+
+        # print("\nParams in application.yml")
+        print("- low d-Spacing crop: ",Config["constants.CropFactors.lowdSpacingCrop"])
+        print("- high d-Spacing crop: ",Config["constants.CropFactors.highdSpacingCrop"])
+
+        # print("\nParams from state")
+        wav = instrumentState.detectorState.wav
+        print("- Central wavelength: ",wav)
+
+        print("\n")
+        bandwidth = instrumentState.instrumentConfig.bandwidth
+        lowWavelengthCrop = instrumentState.instrumentConfig.lowWavelengthCrop
+        lamMin = instrumentState.particleBounds.wavelength.minimum
+        lamMax = instrumentState.particleBounds.wavelength.maximum
+        tofMin = instrumentState.particleBounds.tof.minimum
+        tofMax = instrumentState.particleBounds.tof.maximum
+        
+        print(f"- wavelength limits: {lamMin:.4f}, {lamMax:.4f}")
+        # print(f"- TOF limits: {tofMin:.1f}, {tofMax:.1f}")
+
+        # some tests to confirm that these numbers are being calculated as expected
+        convFactor = Config["constants.m2cm"] * PhysicalConstants.h / PhysicalConstants.NeutronMass
+
+#         print(f""" SOME TESTING...
+# calculated lamMin is {wav - bandwidth/2 + lowWavelengthCrop}:.4f, {}
+# """)
+
+        assert lamMin == wav - bandwidth/2 + lowWavelengthCrop
+        assert lamMax == wav + bandwidth/2
+        # print(f"calculated tof limits: {lamMin*L/convFactor:.1f}, {lamMax*L/convFactor:.1f}")
+        assert tofMin == lamMin*L/convFactor
+        assert tofMax == lamMax*L/convFactor
+        # calcTofM
+        # calcTofMax
+
+        pgs = ingredients.pixelGroups #ingredients.pixelGroups is a list of pgs
+        print("\nPIXEL GROUP PARAMETERS")
+#         print(f"""TOF limits {pgs[0].timeOfFlight.minimum:.1f} - {pgs[0].timeOfFlight.maximum:.1f}
+# Requested Bins across halfWidth: {pgs[0].nBinsAcrossPeakWidth}""")
+
+        for pgs in ingredients.pixelGroups:     #ingredients.pixelGroups is a list of pgs
+            
+            #pgs are pixel group classes, they are iterable with each item in the class are
+            #tuples with the first value of the tuple being its name
+
+            print(f"""
+-----------------------------------------------
+pixel grouping scheme: {pgs.focusGroup.name}
+with {len(pgs.pixelGroupingParameters)} subGroup(s)
+                  """)
+            dMins = []
+            dMaxs = []
+            dBins = []
+            L2s = []
+            twoThetas = []
+
+            for subGroup in pgs.pixelGroupingParameters:
+
+                params = pgs.pixelGroupingParameters[subGroup]
+                dMaxs.append(params.dResolution.maximum)
+                dBins.append(params.dRelativeResolution/pgs.nBinsAcrossPeakWidth)
+                dMins.append(params.dResolution.minimum)
+                L2s.append(params.L2)
+                twoThetas.append(params.twoTheta)
+
+            twoThetasDeg = [180.0*x/np.pi for x in twoThetas]
+            cropDMins = [d+Config["constants.CropFactors.lowdSpacingCrop"] for d in dMins]
+            cropDMaxs = [d-Config["constants.CropFactors.highdSpacingCrop"] for d in dMaxs]
+            #reduce precision for pretty printing
+
+
+
+            dMaxs = [round(num,4) for num in dMaxs]
+            dMins = [round(num,4) for num in dMins]
+            dBins = [round(num,4) for num in dBins]
+            cropDMins = [round(num,4) for num in cropDMins]
+            cropDMaxs = [round(num,4) for num in cropDMaxs]    
+
+            L2s = [round(num,4) for num in L2s]
+            twoThetas = [round(num,4) for num in twoThetas]
+            twoThetasDeg = [round(num,1) for num in twoThetasDeg]
+
+            just = 20
+            print("L2 (m)".ljust(just),L2s)
+            print("twoTheta (rad)".ljust(just),twoThetas)
+            print("twoTheta (deg)".ljust(just),twoThetasDeg)
+            print("dMin (Å)".ljust(just),dMins)
+            print("dMax (Å)".ljust(just),dMaxs)
+            print("dMin (Å) - cropped".ljust(just),cropDMins)
+            print("dMax (Å) - cropped".ljust(just),cropDMaxs)
+            print("dBin".ljust(just),dBins)
+
+
+
+    # for par in instrumentState:
+    #     print(par)
+    config.setLogLevel(3, quiet=True)
+
+
+    
 
