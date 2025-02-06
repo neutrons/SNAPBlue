@@ -1,13 +1,35 @@
 import sys
+import time
 import importlib
 sys.path.append("/SNS/SNAP/shared/code/SNAPBlue")
 import blueUtils as blue
 importlib.reload(blue)
 from mantid import config
 config.setLogLevel(3, quiet=True)
+t0 = time.time()
 
 #IF STATE DOESN'T EXIST SNAPRED WILL FAIL!!!!!!!!!
 # STATE CAN BE CREATED WITH THE TEST PANEL (YOU JUST NEED A RUN NUMBER)
+
+# Data are reduced with blue.reduceSNAP. Minimum input is a run-number but
+# various options can be set as described here 
+
+blue.reduceSNAP(64413)
+
+#Other optional arguments with their default values
+
+# sampleEnv='none', location of .yml file specifying a sample environment (NOT WORKING YET)
+# pixelMaskIndex='none', index "m" of an existing maskworkspace, must have name "MaskWorkspace_m"
+# YMLOverride='none', location of .yml file that will override default .yml
+# continueNoDifcal = False, if True, allows diagnostic reduction using IDF when no difcal exists
+# continueNoVan = False, if True, allows diagnostic reduction with artificial normalisation (from extracted background)
+# verbose=False, if True reports useful info about reduction parameters
+# reduceData=True, if False data will not be reduced (but reduction parameters can be gathered for inspection)
+# lambdaCrop=True, #if True removes all events outside of allowed rang (temporarily needed until SNAPRed can do this during reduction).
+# cisMode=False): $if True intermediate workspaces retained (WARNING: this can use a lot of RAM)
+
+
+# Examples 
 
 # #example run with full calibration the "Happy Path"
 
@@ -34,12 +56,4 @@ config.setLogLevel(3, quiet=True)
 #     pixelMaskIndex = [2]
 #     )
 
-#example of (verbose) inspection of parameters but not actually reducing anything
-
-blue.reduceSNAP(58882,
-    verbose=True,
-    continueNoVan=True,
-    continueNoDifcal=True,
-    reduceData=False
-    )
-
+print(f"\n Complete! execution took: {time.time()-t0:.1f}s")

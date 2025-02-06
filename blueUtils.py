@@ -66,6 +66,7 @@ def reduceSNAP(runNumber,
                continueNoVan = False,
                verbose=False,
                reduceData=True,
+               lambdaCrop=True, #temporarily needed until SNAPRed can do this during reduction
                cisMode=False):
 
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -172,6 +173,8 @@ def reduceSNAP(runNumber,
     reductionService = ReductionService()
     timestamp = reductionService.getUniqueTimestamp()
 
+    
+
     reductionRequest = ReductionRequest(
         runNumber=runNumber,
         useLiteMode=useLiteMode,
@@ -182,25 +185,32 @@ def reduceSNAP(runNumber,
         convertUnitsTo=convertUnitsTo,
         artificialNormalizationIngredients=artificialNormalizationIngredients
     )
+    
 
-    # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    #  Load the supporting data (e.g. default pixel groups etc.)
-    # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    
 
     reductionService.validateReduction(reductionRequest)
+
+    
 
     # 1. load grouping workspaces from the state folder  TODO: how to init state?
     groupings = reductionService.fetchReductionGroupings(reductionRequest)
     reductionRequest.focusGroups = groupings["focusGroups"]
     # 2. Load Calibration (error out if it doesnt exist, comment out if continue anyway)
     # 3. Load Normalization (error out if it doesnt exist, comment out if continue anyway)
-    # 3. Load the run data (lite or native)  
+    # 3. Load the run data (lite or native)
+
+    # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    # "fetchReductionGroceries" Loads necessary data (e.g. sample neutron data,
+    # raw vanadium data, pixel group definitions, DIFCs
+    # and pixel masks )
+    # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
     groceries = reductionService.fetchReductionGroceries(reductionRequest)
+
     groceries["groupingWorkspaces"] = groupings["groupingWorkspaces"]
 
     print(groceries["inputWorkspace"])
-
-    
 
     # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     #  Load the metadata i.e. ingredients
@@ -346,24 +356,25 @@ def reduceSNAP(runNumber,
 
     if reduceData:
 
-        # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        #  Crop data in wavelength space prior to reduction
-        #  This was used while troubleshooting spectral edges
-        #
-        # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        if lambdaCrop:
+            # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+            #  Crop data in wavelength space prior to reduction
+            #  This was used while troubleshooting spectral edges
+            #
+            # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-        # ConvertUnits(InputWorkspace=groceries["inputWorkspace"],
-        #             OutputWorkspace=groceries["inputWorkspace"],
-        #             Target="Wavelength")
-        
-        # CropWorkspace(InputWorkspace=groceries["inputWorkspace"],
-        #             OutputWorkspace=groceries["inputWorkspace"],
-        #             XMin = instrumentState.particleBounds.wavelength.minimum,
-        #             XMax = instrumentState.particleBounds.wavelength.maximum)
-        
-        # ConvertUnits(InputWorkspace=groceries["inputWorkspace"],
-        #             OutputWorkspace=groceries["inputWorkspace"],
-        #             Target="TOF")
+            ConvertUnits(InputWorkspace=groceries["inputWorkspace"],
+                        OutputWorkspace=groceries["inputWorkspace"],
+                        Target="Wavelength")
+            
+            CropWorkspace(InputWorkspace=groceries["inputWorkspace"],
+                        OutputWorkspace=groceries["inputWorkspace"],
+                        XMin = instrumentState.particleBounds.wavelength.minimum,
+                        XMax = instrumentState.particleBounds.wavelength.maximum)
+            
+            ConvertUnits(InputWorkspace=groceries["inputWorkspace"],
+                        OutputWorkspace=groceries["inputWorkspace"],
+                        Target="TOF")
 
 
         # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
