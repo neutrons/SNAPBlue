@@ -3,6 +3,24 @@ import yaml
 from mantid.simpleapi import *
 from mantid.kernel import PhysicalConstants
 import numpy as np
+import json
+import SNAPStateMgr as ssm
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# SNAPRed imports
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+from snapred.backend.dao.ingredients.ArtificialNormalizationIngredients import ArtificialNormalizationIngredients
+from snapred.backend.dao.request import ReductionExportRequest
+from snapred.backend.dao.request.ReductionRequest import ReductionRequest
+from snapred.backend.data.DataFactoryService import DataFactoryService
+from snapred.backend.error.ContinueWarning import ContinueWarning
+from snapred.backend.recipe.ReductionRecipe import ReductionRecipe
+from snapred.backend.service.ReductionService import ReductionService
+from snapred.backend.dao.indexing.Versioning import Version, VersionState
+from snapred.meta.mantid.WorkspaceNameGenerator import WorkspaceNameGenerator as wng
+from snapred.meta.Config import Config
+# from snapred.backend.data import LocalDataService as lds
+from snapred.backend.dao.request.FarmFreshIngredients import FarmFreshIngredients
+from snapred.backend.service.SousChef import SousChef
 
 class globalParams:
 
@@ -58,6 +76,42 @@ def loadSEE(seeDefinition,SEEFolder):
 
     return seeDict
 
+def propagateDifcal(refRunNumber,isLite,propagate=False):
+
+    #This will accept a reference Run number, determine a list of all existing 
+    # states with equivalent detector positions propagate and their (diff) calibration status
+    # if propagate==True, the latest calibration from the state corresponding to 
+    # refRunNumber will be propagates to other compatible states as if it's a formal
+    # calibration
+ 
+    dataFactoryService = DataFactoryService()
+    if type(refRunNumber) != str:
+        refRunNumber=str(refRunNumber)
+    stateID = dataFactoryService.constructStateId(refRunNumber)
+    refStateID = stateID[0]
+    refStateDictString = stateID[1]
+    refDetConfig = ssm.detectorConfig(refStateDictString)
+
+    print(f"referenceRun: {refRunNumber} stateID: {refStateID} detector config:{refDetConfig}\n")
+
+    print("Checking all other existing states:")
+    for stateID in availableStates():
+        if stateID != refStateID:
+            stateDict = ssm.pullStateDict(stateID)
+            detConfig = ssm.detectorConfig(stateDict)
+            print("state ID: ",stateID)
+            print("detector config: ",detConfig)
+            match= detConfig == refDetConfig
+            print("matches ref: ",match)
+
+    #TODO: 
+    # 1. obtain version of any existing difcal in the new state
+    # 2. using islite setting copy difcal information from ref to matching state
+    # 2. update calibration index of matching state
+
+
+    print("not working yet")
+
 def reduceSNAP(runNumber,
                sampleEnv='none',
                pixelMaskIndex='none',
@@ -66,26 +120,8 @@ def reduceSNAP(runNumber,
                continueNoVan = False,
                verbose=False,
                reduceData=True,
-               lambdaCrop=True, #temporarily needed until SNAPRed can do this during reduction
+               lambdaCrop=True, #temporarily needed until SNAPRed can do this during
                cisMode=False):
-
-    # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    # SNAPRed imports
-    # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    from snapred.backend.dao.ingredients.ArtificialNormalizationIngredients import ArtificialNormalizationIngredients
-    from snapred.backend.dao.request import ReductionExportRequest
-    from snapred.backend.dao.request.ReductionRequest import ReductionRequest
-    from snapred.backend.data.DataFactoryService import DataFactoryService
-    from snapred.backend.error.ContinueWarning import ContinueWarning
-    from snapred.backend.recipe.ReductionRecipe import ReductionRecipe
-    from snapred.backend.service.ReductionService import ReductionService
-    from snapred.backend.dao.indexing.Versioning import Version, VersionState
-    from snapred.meta.mantid.WorkspaceNameGenerator import WorkspaceNameGenerator as wng
-    from snapred.meta.Config import Config
-    # from snapred.backend.data import LocalDataService as lds
-    from snapred.backend.dao.request.FarmFreshIngredients import FarmFreshIngredients
-    from snapred.backend.service.SousChef import SousChef
-    
 
 
     from rich import print as printRich

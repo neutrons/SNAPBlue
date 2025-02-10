@@ -14,7 +14,7 @@ t0 = time.time()
 # Data are reduced with blue.reduceSNAP. Minimum input is a run-number but
 # various options can be set as described here 
 
-blue.reduceSNAP(64413)
+blue.reduceSNAP(64413,verbose=True)
 
 #Other optional arguments with their default values
 
