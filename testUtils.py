@@ -13,13 +13,12 @@ t0 = time.time()
 isLite = True
 
 # create State
-ssm.createState(64434,
-    isLite)
+# ssm.createState(64434,
+#     isLite)
 #propagate difcal
 
-blue.propagateDifcal(64434,
-
+blue.propagateDifcal(64431,
     isLite,
-    propagate=False)
+    propagate=True)
 
 print(f"\n Complete! execution took: {time.time()-t0:.1f}s")

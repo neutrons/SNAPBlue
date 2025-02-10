@@ -89,9 +89,22 @@ def propagateDifcal(refRunNumber,isLite,propagate=False):
     refStateID,refStateDict = ssm.stateDef(refRunNumber)
     refDetConfig = ssm.detectorConfig(refStateDict)
 
-    print(f"\nreferenceRun: {refRunNumber} stateID: {refStateID} detector config:{refDetConfig}\n")
-
-    print("Checking all other existing states:")
+    # check diffraction calibration status of reference run
+    refCalStatus = ssm.checkCalibrationStatus(refStateID,isLite,"difcal")
+    # if state is uncalibrated, stop. Nothing to propagate
+    if not refCalStatus["isCalibrated"]:
+        print("ERROR: Reference State is uncalibrated! Please calibrate or choose a different reference")
+        return
+    else:
+         print(f"""
+propagateDifcal: Utility to copy calibrations
+Seed calibration info
+    - Run:  {refRunNumber}
+    - State: {refStateID}
+    - Detector config: {refDetConfig}
+    - calibrated: {refCalStatus['numberCalibrations']} times
+    - latest version: {refCalStatus['mostRecentCalib']['version']}           
+    """)
 
     nCompatibleStates = 0
     for stateID in ssm.availableStates():
@@ -102,13 +115,13 @@ def propagateDifcal(refRunNumber,isLite,propagate=False):
                 print("\nState with matching detector config found! ")
                 print("state ID: ",stateID)
                 print("detector config: ",detConfig)
-                print("Diffraction Calibration Status:")
+
                 calStatus = ssm.checkCalibrationStatus(stateID,isLite,"difcal")
-                print(calStatus)
-                print("autoStateName: ",ssm.autoStateName(stateDict))
+                ssm.copyDifcal(refCalStatus,calStatus,propagate)
+     
                 nCompatibleStates += 1
 
-    print(f"Found {nCompatibleStates} state(s) with matching detector configs\n")
+    print(f"{nCompatibleStates} state(s) were found with matching detector configs\n")
 
     #TODO: 
     # 1. obtain version of any existing difcal in the new state
