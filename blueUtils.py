@@ -4,7 +4,9 @@ from mantid.simpleapi import *
 from mantid.kernel import PhysicalConstants
 import numpy as np
 import json
+import importlib
 import SNAPStateMgr as ssm
+importlib.reload(ssm)
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # SNAPRed imports
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -84,18 +86,13 @@ def propagateDifcal(refRunNumber,isLite,propagate=False):
     # refRunNumber will be propagates to other compatible states as if it's a formal
     # calibration
  
-    dataFactoryService = DataFactoryService()
-    if type(refRunNumber) != str:
-        refRunNumber=str(refRunNumber)
-    stateID = dataFactoryService.constructStateId(refRunNumber)
-    refStateID = stateID[0]
-    refStateDictString = stateID[1]
-    refDetConfig = ssm.detectorConfig(refStateDictString)
+    refStateID,refStateDict = ssm.stateDef(refRunNumber)
+    refDetConfig = ssm.detectorConfig(refStateDict)
 
     print(f"referenceRun: {refRunNumber} stateID: {refStateID} detector config:{refDetConfig}\n")
 
     print("Checking all other existing states:")
-    for stateID in availableStates():
+    for stateID in ssm.availableStates():
         if stateID != refStateID:
             stateDict = ssm.pullStateDict(stateID)
             detConfig = ssm.detectorConfig(stateDict)
@@ -103,6 +100,9 @@ def propagateDifcal(refRunNumber,isLite,propagate=False):
             print("detector config: ",detConfig)
             match= detConfig == refDetConfig
             print("matches ref: ",match)
+            calStatus = ssm.checkCalibrationStatus(stateID,isLite,"difcal")
+            print(calStatus)
+            print("autoStateName: ",ssm.autoStateName(stateDict))
 
     #TODO: 
     # 1. obtain version of any existing difcal in the new state
@@ -110,7 +110,7 @@ def propagateDifcal(refRunNumber,isLite,propagate=False):
     # 2. update calibration index of matching state
 
 
-    print("not working yet")
+    print("\npropagateDifCal is still under development!")
 
 def reduceSNAP(runNumber,
                sampleEnv='none',

@@ -23,80 +23,101 @@ from snapred.backend.service.ReductionService import ReductionService
 from snapred.backend.dao.indexing.Versioning import Version, VersionState
 from snapred.meta.mantid.WorkspaceNameGenerator import WorkspaceNameGenerator as wng
 from snapred.meta.Config import Config
-# from snapred.backend.data import LocalDataService as lds
+from snapred.backend.data import LocalDataService as lds
 from snapred.backend.dao.request.FarmFreshIngredients import FarmFreshIngredients
 from snapred.backend.service.SousChef import SousChef
 
+class SNAPHome():
+   # main definition of calibration directory
+   def __init__(self):
+      self.calib = Config['instrument.calibration.home']
+      self.powder = self.calib + "/Powder/"
 
 def loadSNAPInstPrm():
 
-  #TODO: remove hardcoding of this location
-   
-  instPrmJson = '/SNS/SNAP/shared/Calibration_testing/SNAPInstPrm.json'
+  home = SNAPHome()
+  instPrmJson = home + 'SNAPInstPrm.json'
 
   with open(instPrmJson, "r") as json_file:
     instPrm = json.load(json_file)
   return instPrm 
 
-def checkStateExists(stateID,powderHome):
+def stateDef(runNumber):
+    #returns a list, first entry is stateID, second is dictionary of state parameters
+    
+    dataFactoryService = DataFactoryService()
+    if type(runNumber) != str:
+            runNumber=str(runNumber)
 
+    stateID,stateDictStr = dataFactoryService.constructStateId(runNumber)
+    stateDict = json.loads(stateDictStr)
+    print("ssm stateDef function returns this dict: ",stateDict)
+
+    return [stateID,stateDict]
+
+def checkStateExists(stateID):
+  
+  home = SNAPHome()
+  powderHome = home.powder
   statePath = f"{powderHome}{stateID}/"
-  # print(statePath)
-  # print("exists:",os.path.exists(statePath))
+
   return os.path.exists(statePath) 
  
-def checkCalibrationStatus(stateID,powderHome,isLite,calType):
+def checkCalibrationStatus(stateID,isLite,calType):
 
-  #dictionary to hold status
-  calStatus = {
+    home = SNAPHome()
+    powderHome = home.powder
+    #dictionary to hold status
+    calStatus = {
     "stateID":stateID,
     "calibrationType":calType
     }
 
-  #dictionaries to build paths for difference cases
-  subFolder = {"difcal":'diffraction',
+    #dictionaries to build paths for difference cases
+    subFolder = {"difcal":'diffraction',
                 "normcal":"normalization"}
-  
-  jsonName = {"difcal":"CalibrationIndex.json",
-              "normcal":"NormalizationIndex.json"}
-  
-  firstIndex = {"difcal":1,
-                      "normcal":0}    #annoyingly these are different
 
-  #build paths
-  if isLite:
-      indexPath = f"{powderHome}/{stateID}/lite/{subFolder[calType]}/{jsonName[calType]}"
-  else:
-      indexPath = f"{powderHome}/{stateID}/native/{subFolder[calType]}/{jsonName[calType]}"
+    jsonName = {"difcal":"CalibrationIndex.json",
+                "normcal":"NormalizationIndex.json"}
 
-  #first check if index exists
-  if not os.path.isfile(indexPath):
-      calStatus["isCalibrated"] = False
-      calStatus["numberCalibrations"] = 0
-      calStatus["latestCalibration"] = "never"
-      
-      return calStatus
+    firstIndex = {"difcal":1,
+                 "normcal":0}    #annoyingly these are different
 
-  #if index exists, read it    
-  f = open(indexPath)
-  calIndex = json.load(f)
-  f.close()    
-  
-  if len(calIndex) > firstIndex[calType]:
-      calStatus["isCalibrated"] = True
-      calStatus["NumberCalibrations"] = len(calIndex)-1
-      ts = calIndex[-1]["timestamp"]
-      calStatus["latestCalibration"] = datetime.fromtimestamp(int(ts)).strftime('%Y-%m-%d %H:%M:%S')
-      calStatus["calibRuns"] = []
-      for entry in calIndex[firstIndex[calType]:]:
-        calStatus["calibRuns"].append(entry["runNumber"])
+    #build paths
+    if isLite:
+        indexPath = f"{powderHome}{stateID}/lite/{subFolder[calType]}/{jsonName[calType]}"
+    else:
+        indexPath = f"{powderHome}{stateID}/native/{subFolder[calType]}/{jsonName[calType]}"
 
-  else:
-      calStatus["isCalibrated"] = False
-      calStatus["numberCalibrations"] = 0
-      calStatus["latestCalibration"] = "never"
+    #first check if index exists
+    if not os.path.isfile(indexPath):
+        calStatus["isCalibrated"] = False
+        calStatus["numberCalibrations"] = 0
+        calStatus["latestCalibration"] = "never"
+        
+        return calStatus
 
-  return calStatus
+    #if index exists, read it    
+    f = open(indexPath)
+    calIndex = json.load(f)
+    f.close()    
+
+    if len(calIndex) > firstIndex[calType]:
+        calStatus["isCalibrated"] = True
+        calStatus["NumberCalibrations"] = len(calIndex)-1
+        ts = calIndex[-1]["timestamp"]
+        calStatus["latestCalibration"] = datetime.fromtimestamp(int(ts)).strftime('%Y-%m-%d %H:%M:%S')
+        calStatus["calibRuns"] = []
+        for entry in calIndex[firstIndex[calType]:]:
+            calStatus["calibRuns"].append(entry["runNumber"])
+
+    else:
+        calStatus["isCalibrated"] = False
+        calStatus["numberCalibrations"] = 0
+        calStatus["latestCalibration"] = "never"
+
+    calStatus["indexPath"] = indexPath
+    return calStatus
 
 def detectorConfig(stateDict):
 
@@ -107,15 +128,22 @@ def detectorConfig(stateDict):
 
     #stateDictString can be two different things depending on how it's made ugh... 
     #manage this:
-    if type(stateDict)==str:
-        stateDict = json.loads(stateDict) #convert to dict 
-        detectorDict = {
+    # Think this is fixed now
+    # if type(stateDict)==str:
+    #     stateDict = json.loads(stateDict) #convert to dict 
+    #     detectorDict = {
+    #         "vdet_arc1" : stateDict["vdet_arc1"],
+    #         "vdet_arc2" : stateDict["vdet_arc2"]}
+    # else:
+    #     detectorDict = {
+    #         "vdet_arc1" : stateDict["arc"][0],
+    #         "vdet_arc2" : stateDict["arc"][0]}
+
+    print("detectorConfig:",stateDict)
+
+    detectorDict = {
             "vdet_arc1" : stateDict["vdet_arc1"],
             "vdet_arc2" : stateDict["vdet_arc2"]}
-    else:
-        detectorDict = {
-            "vdet_arc1" : stateDict["arc"][0],
-            "vdet_arc2" : stateDict["arc"][0]}
         
     hasher = hashlib.shake_256()
     decodedKey = json.dumps(detectorDict).encode('utf-8')
@@ -123,11 +151,13 @@ def detectorConfig(stateDict):
     hashedKey = hasher.digest(4).hex()
 
     return hashedKey
+   
 
 def availableStates():
 
     #list of non state folders within main calibration directory (just one atm)
-    powderHome = Config['instrument.calibration.home']+"/Powder/"
+    home = SNAPHome()
+    powderHome = home.powder
     nonStateFolders = ['PixelGroupingDefinitions']
 
     #create list of state folders
@@ -148,5 +178,43 @@ def pullStateDict(stateIDString):
     stateParamsJson = json.load(f)
     f.close()
 
+    ##TODO: this returns dictionary with different keys from defState. Convert the keys to 
+    #match
+
+    initDict = stateParamsJson["instrumentState"]["detectorState"]
+    finalDict = {"vdet_arc1" : initDict["arc"][0],
+                 "vdet_arc2" : initDict["arc"][1],
+                 "WavelengthUserReq" : initDict["wav"],
+                 "Frequency" : initDict["freq"] ,
+                 "Pos" : initDict["guideStat"]
+                 }
+
     # print(stateParamsJson["instrumentState"]["detectorState"])
-    return stateParamsJson["instrumentState"]["detectorState"]
+    return finalDict
+
+def autoStateName(stateDict):
+
+    print(stateDict)
+
+    arcStr1 = f"{stateDict['vdet_arc1']:.1f}".rjust(6)
+    arcStr2 = f"{stateDict['vdet_arc2']:.1f}".rjust(6)
+    lamStr = f"{stateDict['WavelengthUserReq']:.1f}".rjust(4)
+    freqStr = f"{stateDict['Frequency']:.0f}".rjust(3)
+    guideStr = str(stateDict['Pos']).rjust(2)
+    name = f"{arcStr1}|{arcStr2}|{lamStr}|{freqStr}|{guideStr}"
+    return name
+
+def createState(runNumber,isLite,hrn='none'):
+
+    stateID,stateDict = stateDef(runNumber)
+
+    #only do anything if state doesn't exist
+    if checkStateExists(stateID):
+        print(f"state: {stateID} already exists. Nothing to do")
+    else: 
+        if hrn == 'none':
+            hrn = autoStateName(stateDict) # if not specified, humanReadableName will be auto generated.
+
+        print(f"Creating state {stateID} with name {hrn}")
+        localDataService = lds.LocalDataService()
+        localDataService.initializeState(str(runNumber), isLite, hrn)
