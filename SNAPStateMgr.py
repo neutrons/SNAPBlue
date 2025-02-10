@@ -126,19 +126,6 @@ def detectorConfig(stateDict):
 
     import hashlib
 
-    #stateDictString can be two different things depending on how it's made ugh... 
-    #manage this:
-    # Think this is fixed now
-    # if type(stateDict)==str:
-    #     stateDict = json.loads(stateDict) #convert to dict 
-    #     detectorDict = {
-    #         "vdet_arc1" : stateDict["vdet_arc1"],
-    #         "vdet_arc2" : stateDict["vdet_arc2"]}
-    # else:
-    #     detectorDict = {
-    #         "vdet_arc1" : stateDict["arc"][0],
-    #         "vdet_arc2" : stateDict["arc"][0]}
-
     print("detectorConfig:",stateDict)
 
     detectorDict = {
@@ -178,15 +165,22 @@ def pullStateDict(stateIDString):
     stateParamsJson = json.load(f)
     f.close()
 
-    ##TODO: this returns dictionary with different keys from defState. Convert the keys to 
-    #match
+    # This returns dictionary with different keys from defState. Convert the keys to 
+    # match. Also, need to apply rounding that is used when generating state info.
 
     initDict = stateParamsJson["instrumentState"]["detectorState"]
-    finalDict = {"vdet_arc1" : initDict["arc"][0],
-                 "vdet_arc2" : initDict["arc"][1],
-                 "WavelengthUserReq" : initDict["wav"],
-                 "Frequency" : initDict["freq"] ,
-                 "Pos" : initDict["guideStat"]
+
+    arc1 = float(round(initDict["arc"][0]*2)/2)
+    arc2 = float(round(initDict["arc"][1]*2)/2)
+    wav = float(round(initDict["wav"],1))
+    freq = int(round(initDict["freq"] ))
+    pos = int(initDict["guideStat"])
+
+    finalDict = {"vdet_arc1" : arc1,
+                 "vdet_arc2" : arc2,
+                 "WavelengthUserReq" : wav,
+                 "Frequency" : freq,
+                 "Pos" : pos 
                  }
 
     # print(stateParamsJson["instrumentState"]["detectorState"])

@@ -17,7 +17,8 @@ ssm.createState(64434,
     isLite)
 #propagate difcal
 
-blue.propagateDifcal(64413,
+blue.propagateDifcal(64434,
+
     isLite,
     propagate=False)
 
