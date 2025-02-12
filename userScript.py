@@ -14,7 +14,7 @@ t0 = time.time()
 # Data are reduced with blue.reduceSNAP. Minimum input is a run-number but
 # various options can be set as described here 
 
-blue.reduceSNAP(64431,verbose=True)
+blue.reduce(64431,verbose=True)
 
 #Other optional arguments with their default values
 
@@ -26,6 +26,7 @@ blue.reduceSNAP(64431,verbose=True)
 # verbose=False, if True reports useful info about reduction parameters
 # reduceData=True, if False data will not be reduced (but reduction parameters can be gathered for inspection)
 # lambdaCrop=True, #if True removes all events outside of allowed rang (temporarily needed until SNAPRed can do this during reduction).
+# emptyTrash=True, #if True removes all intermediate workspaces during reduction leaving a clean tree (except the unfocussed vanadium)
 # cisMode=False): $if True intermediate workspaces retained (WARNING: this can use a lot of RAM)
 
 
@@ -33,25 +34,25 @@ blue.reduceSNAP(64431,verbose=True)
 
 # #example run with full calibration the "Happy Path"
 # 
-# blue.reduceSNAP(64431
+# blue.reduce(64431
 #     )
 
 #example run where state exists but has no difcal or normcal
 
-# blue.reduceSNAP(63424,
+# blue.reduce(63424,
 #     continueNoVan=True,
 #     continueNoDifcal=True
 #     )    
 
 #example run where difcal exists but normcal doesn't
 
-# blue.reduceSNAP(58882,
+# blue.reduce(58882,
 #    continueNoVan=True
 #    ) 
 
 #example using override yml
 
-# blue.reduceSNAP(61991,
+# blue.reduce(61991,
 #     YMLOverride = "/SNS/SNAP/shared/Malcolm/SNAPBlue/override.yml", # set to retain unfocussed ws
 #     pixelMaskIndex = [2]
 #     )

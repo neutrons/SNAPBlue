@@ -140,7 +140,7 @@ Origin calibration info
 
 
 
-def reduceSNAP(runNumber,
+def reduce(runNumber,
                sampleEnv='none',
                pixelMaskIndex='none',
                YMLOverride='none',
