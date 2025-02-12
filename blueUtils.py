@@ -97,8 +97,10 @@ def propagateDifcal(refRunNumber,isLite,propagate=False):
         return
     else:
          print(f"""
+/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 propagateDifcal: Utility to copy calibrations
-Seed calibration info
+/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+Origin calibration info
     - Run:  {refRunNumber}
     - State: {refStateID}
     - Detector config: {refDetConfig}
@@ -107,29 +109,36 @@ Seed calibration info
     """)
 
     nCompatibleStates = 0
+    toPropagateCal = []
+    toPropagateState = []
+    toPropagateDetConfig = []
     for stateID in ssm.availableStates():
         if stateID != refStateID:
             stateDict = ssm.pullStateDict(stateID) ##
             detConfig = ssm.detectorConfig(stateDict)
             if detConfig == refDetConfig:
-                print("\nState with matching detector config found! ")
-                print("state ID: ",stateID)
-                print("detector config: ",detConfig)
-
                 calStatus = ssm.checkCalibrationStatus(stateID,isLite,"difcal")
-                ssm.copyDifcal(refCalStatus,calStatus,propagate)
-     
+                toPropagateCal.append(calStatus)
+                toPropagateState.append(stateID)
+                toPropagateDetConfig.append(detConfig)
+                     
                 nCompatibleStates += 1
 
-    print(f"{nCompatibleStates} state(s) were found with matching detector configs\n")
+    print(f"\n{nCompatibleStates} state(s) found with matching detector configs\n")
 
-    #TODO: 
-    # 1. obtain version of any existing difcal in the new state
-    # 2. using islite setting copy difcal information from ref to matching state
-    # 2. update calibration index of matching state
+    print("Existing compatible states are:")
+    for state in toPropagateState:
+        print(state)
+
+    if propagate:
+        print("\nThese will be propagated")
+        for cal in toPropagateCal:
+            ssm.copyDifcal(refCalStatus,cal,propagate)
+    else:
+        print("\nPropagatation of calibration was not requested")
+        
 
 
-    print("\npropagateDifCal is still under development!")
 
 def reduceSNAP(runNumber,
                sampleEnv='none',

@@ -19,7 +19,7 @@ isLite = True
 # 
 blue.propagateDifcal(64431,
     isLite,
-    propagate=True)
+    propagate=False)
  
 # cr_old = ssm.loadCalibrationRecord(64431,isLite,3)
 # cr_new = ssm.loadCalibrationRecord(64433,isLite,0)
