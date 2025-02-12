@@ -14,7 +14,7 @@ t0 = time.time()
 # Data are reduced with blue.reduceSNAP. Minimum input is a run-number but
 # various options can be set as described here 
 
-blue.reduceSNAP(64413,verbose=True)
+blue.reduceSNAP(64431,verbose=True)
 
 #Other optional arguments with their default values
 
@@ -32,8 +32,8 @@ blue.reduceSNAP(64413,verbose=True)
 # Examples 
 
 # #example run with full calibration the "Happy Path"
-
-# blue.reduceSNAP(61991
+# 
+# blue.reduceSNAP(64431
 #     )
 
 #example run where state exists but has no difcal or normcal

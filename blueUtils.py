@@ -139,7 +139,8 @@ def reduceSNAP(runNumber,
                continueNoVan = False,
                verbose=False,
                reduceData=True,
-               lambdaCrop=True, #temporarily needed until SNAPRed can do this during
+               lambdaCrop=True, #temporarily needed until SNAPRed can do this during reduction
+               emptyTrash=True, #remove temporary mantid workspaces at the end of reduction 
                cisMode=False):
 
 
@@ -615,6 +616,22 @@ with {len(pgs.pixelGroupingParameters)} subGroup(s)
             print("dBin".ljust(just),dBins)
 
 
+    #clean up after myself
+
+    dirty = ["tof_all_lite_copy",
+             "tof_all_lite_raw",
+             "tof_all_copy",
+             "tof_all_raw",
+             "SNAPLite_grouping",
+             "SNAP_grouping",
+             "diffract_consts_",
+             "pixelmask_"] #workspaces with these expresions in their names
+    if emptyTrash:
+        wsList = mtd.getObjectNames()
+        for ws in wsList:
+            for dirt in dirty:
+                if dirt in ws:
+                    DeleteWorkspace(ws)
 
     # for par in instrumentState:
     #     print(par)
