@@ -7,6 +7,8 @@ import json
 import importlib
 import SNAPStateMgr as ssm
 importlib.reload(ssm)
+import SNAPExportTools as exportTools
+importlib.reload(exportTools)
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # SNAPRed imports
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -78,6 +80,12 @@ def loadSEE(seeDefinition,SEEFolder):
 
     return seeDict
 
+def exportData(exportFormats=['gsa','xye','csv'],latestOnly=True,gsaInstPrm=True):
+
+    exportTools.reducedRuns(exportFormats,
+                            latestOnly,
+                            gsaInstPrm)
+
 def propagateDifcal(refRunNumber,isLite,propagate=False):
 
     #This will accept a reference Run number, determine a list of all existing 
@@ -138,8 +146,6 @@ Origin calibration info
         print("\nPropagatation of calibration was not requested")
         
 
-
-
 def reduce(runNumber,
                sampleEnv='none',
                pixelMaskIndex='none',
@@ -148,12 +154,11 @@ def reduce(runNumber,
                continueNoVan = False,
                verbose=False,
                reduceData=True,
+               keepUnfocussed=False,
                lambdaCrop=True, #temporarily needed until SNAPRed can do this during reduction
-               emptyTrash=True, #remove temporary mantid workspaces at the end of reduction 
+               emptyTrash=True, #remove temporary mantid workspaces at the end of reduction
+               export=['gsas','xye','ascii'], #file formats to export to. If empty, no export 
                cisMode=False):
-
-
-    from rich import print as printRich
 
     from mantid import config
 
@@ -185,7 +190,7 @@ def reduce(runNumber,
     #set global parameters
     useLiteMode=blueGlob.useLiteMode
     pixelMasks = blueGlob.pixelMasks
-    keepUnfocussed = blueGlob.keepUnfocussed
+    # keepUnfocussed = blueGlob.keepUnfocussed
     convertUnitsTo = blueGlob.convertUnitsTo
 
     #process continue flags

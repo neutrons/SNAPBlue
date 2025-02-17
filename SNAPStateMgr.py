@@ -54,8 +54,31 @@ def stateDef(runNumber):
     if type(runNumber) != str:
             runNumber=str(runNumber)
 
-    stateID,stateDictStr = dataFactoryService.constructStateId(runNumber)
-    stateDict = json.loads(stateDictStr)
+    stateID,detectorState = dataFactoryService.constructStateId(runNumber)
+    # print(f"stateID is: {stateID}")
+    # print("state Dict:")
+    # print(stateDictStr)
+    # print(f"its type is: {type(stateDictStr)}")
+    # this service used to return a string, now it returns a class
+    # this function is expected to return a dictionary, so attempt to build this 
+    # json from the class...
+
+    stateDict = {
+        "vdet_arc1" : detectorState.arc[0],
+        "vdet_arc2" : detectorState.arc[1],
+        "WavelengthUserReq" : detectorState.wav,
+        "Frequency" : detectorState.freq,
+        "Pos" : detectorState.guideStat
+    }
+
+    # stateDict = json.loads(stateDictStr)    #convert string to jso"stat
+
+
+    # arcStr1 = f"{stateDict['vdet_arc1']:.1f}".rjust(6)
+    # arcStr2 = f"{stateDict['vdet_arc2']:.1f}".rjust(6)
+    # lamStr = f"{stateDict['WavelengthUserReq']:.1f}".rjust(4)
+    # freqStr = f"{stateDict['Frequency']:.0f}".rjust(3)
+    # guideStr = str(stateDict['Pos']).rjust(2)
 
     return [stateID,stateDict]
 
