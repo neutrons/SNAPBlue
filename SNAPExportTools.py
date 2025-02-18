@@ -244,6 +244,12 @@ def exportRecipe(runDict,pgs,processIndices,gsaInstPrm):
         ConvertUnits(InputWorkspace=wsName,
                      OutputWorkspace=wsName,
                      Target='TOF')
+        
+        scaleFactor=1e4
+        Scale(InputWorkspace=wsName,
+                OutputWorkspace=wsName,
+                Factor = scaleFactor,
+                Operation='Multiply')
 
         exportFormats = [x["ext"] for x in redObj.exportPaths]
         # print("exportFormats to use are:", exportFormats)        
@@ -297,12 +303,17 @@ def exportRecipe(runDict,pgs,processIndices,gsaInstPrm):
                          f"_{redObj.timeStamp}"
                          f"{exportDict['ext']}")
 
+            
+            
+            
             SaveFocusedXYE(InputWorkspace=wsName,
                     Filename=fName,
                     SplitFiles=True,
                     Append=False,
                     includeHeader=False,
                     Format="TOPAS")
+            
+            
             
             print("XYE file written to:",fName) 
 
@@ -336,6 +347,10 @@ def exportRecipe(runDict,pgs,processIndices,gsaInstPrm):
             
             print("CSV file written to:",fName) 
 
+        Scale(InputWorkspace=wsName,
+                  OutputWorkspace=wsName,
+                  Factor = (1.0/scaleFactor),
+                  Operation='Multiply')
     
 #GSAS2 specific utilities
 

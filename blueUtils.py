@@ -80,6 +80,55 @@ def loadSEE(seeDefinition,SEEFolder):
 
     return seeDict
 
+def indexStates(isLite=True):
+
+    allAvailableStates = ssm.availableStates()
+
+        #12345678901234567890123456789012345678901234567890
+
+    
+    outputStrings = []
+    statuses = []
+    for stateID in allAvailableStates:
+
+        stateDict = ssm.pullStateDict(stateID)
+        difcal = ssm.checkCalibrationStatus(stateID,isLite,calType='difcal')
+        nrmcal = ssm.checkCalibrationStatus(stateID,isLite,calType='normcal')
+
+        # parse possible scenarios
+        if difcal["isCalibrated"] and nrmcal["isCalibrated"]:
+            calStatus = '*CALIB*'
+        if not difcal["isCalibrated"] or not nrmcal["isCalibrated"]:
+            calStatus = "PARTIAL"
+        if not difcal["isCalibrated"] and not nrmcal["isCalibrated"]:
+            calStatus = "UNCALIB"
+
+        desc = ssm.autoStateName(stateDict)
+        nDifcal = difcal['numberCalibrations'] 
+        nNrmcal = nrmcal['numberCalibrations'] 
+
+        outputString = (f"{stateID}|{desc}|"
+                        f" {calStatus} |     {nDifcal}     |    {nNrmcal}      |"
+                        )
+        statuses.append(calStatus) 
+        outputStrings.append(outputString)
+
+    #output in order of calibration status...
+    print("\n StateID        | Desc.                   | Status  |No. difcals|No. nrmcals|")
+    for i,string in enumerate(outputStrings):
+        if statuses[i] == "UNCALIB":
+            print(string) 
+
+    for i,string in enumerate(outputStrings):
+        if statuses[i] == "PARTIAL":
+            print(string) 
+
+    for i,string in enumerate(outputStrings):
+        if statuses[i] == "*CALIB*":
+            print(string) 
+
+
+
 def exportData(exportFormats=['gsa','xye','csv'],latestOnly=True,gsaInstPrm=True):
 
     exportTools.reducedRuns(exportFormats,

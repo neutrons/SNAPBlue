@@ -1,8 +1,5 @@
 # SNAPStateManager is a module for holding convenient functions for managing SNAP instrument states
 #
-# TODO: contains functions copied from "stateFromRun.py" at some point should edit that script to
-# point to this module
-
 import h5py
 import sys
 import json
@@ -11,23 +8,22 @@ import os
 import sys
 import copy
 import shutil
-# from finddata import cli
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # SNAPRed imports TODO: clean up what is not needed...
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-from snapred.backend.dao.ingredients.ArtificialNormalizationIngredients import ArtificialNormalizationIngredients
-from snapred.backend.dao.request import ReductionExportRequest
-from snapred.backend.dao.request.ReductionRequest import ReductionRequest
+# from snapred.backend.dao.ingredients.ArtificialNormalizationIngredients import ArtificialNormalizationIngredients
+# from snapred.backend.dao.request import ReductionExportRequest
+# from snapred.backend.dao.request.ReductionRequest import ReductionRequest
 from snapred.backend.data.DataFactoryService import DataFactoryService
-from snapred.backend.error.ContinueWarning import ContinueWarning
-from snapred.backend.recipe.ReductionRecipe import ReductionRecipe
-from snapred.backend.service.ReductionService import ReductionService
-from snapred.backend.dao.indexing.Versioning import Version, VersionState
+# from snapred.backend.error.ContinueWarning import ContinueWarning
+# from snapred.backend.recipe.ReductionRecipe import ReductionRecipe
+# from snapred.backend.service.ReductionService import ReductionService
+# from snapred.backend.dao.indexing.Versioning import Version, VersionState
 from snapred.meta.mantid.WorkspaceNameGenerator import WorkspaceNameGenerator as wng
 from snapred.meta.Config import Config
 from snapred.backend.data import LocalDataService as lds
-from snapred.backend.dao.request.FarmFreshIngredients import FarmFreshIngredients
-from snapred.backend.service.SousChef import SousChef
+# from snapred.backend.dao.request.FarmFreshIngredients import FarmFreshIngredients
+# from snapred.backend.service.SousChef import SousChef
 from snapred.backend.data.LocalDataService import LocalDataService
 from snapred.backend.dao.indexing.IndexEntry import IndexEntry
 
@@ -134,7 +130,7 @@ def checkCalibrationStatus(stateID,isLite,calType):
     mostRecentCalib = 0
     if len(calIndex) > firstIndex[calType]:
         calStatus["isCalibrated"] = True
-        calStatus["numberCalibrations"] = len(calIndex)-1
+        calStatus["numberCalibrations"] = len(calIndex)-firstIndex[calType]
         ts = calIndex[-1]["timestamp"]
         calStatus["latestCalibration"] = datetime.fromtimestamp(int(ts)).strftime('%Y-%m-%d %H:%M:%S')
         calStatus["calibRuns"] = []
@@ -143,7 +139,7 @@ def checkCalibrationStatus(stateID,isLite,calType):
             calStatus["calibRuns"].append(entry["runNumber"])
             if entry["timestamp"]>= mostRecentCalibTS:
                 mostRecentCalibTS = entry["timestamp"]
-                mostRecentCalib = i + 1 #zeroth index is not counted
+                mostRecentCalib = i + firstIndex[calType] #zeroth index is not counted
 
     else:
         calStatus["isCalibrated"] = False
@@ -152,6 +148,8 @@ def checkCalibrationStatus(stateID,isLite,calType):
 
     calStatus["indexPath"] = indexPath
     calStatus["calibIndex"] = calIndex #list of calibrations
+
+
     calStatus["mostRecentCalib"] = calIndex[mostRecentCalib] #dict for most recent calibration
     return calStatus
 
@@ -218,19 +216,17 @@ def pullStateDict(stateIDString):
                  "Pos" : pos 
                  }
 
-    # print(stateParamsJson["instrumentState"]["detectorState"])
     return finalDict
 
 def autoStateName(stateDict):
 
-    print(stateDict)
 
     arcStr1 = f"{stateDict['vdet_arc1']:.1f}".rjust(6)
     arcStr2 = f"{stateDict['vdet_arc2']:.1f}".rjust(6)
     lamStr = f"{stateDict['WavelengthUserReq']:.1f}".rjust(4)
     freqStr = f"{stateDict['Frequency']:.0f}".rjust(3)
     guideStr = str(stateDict['Pos']).rjust(2)
-    name = f"{arcStr1}|{arcStr2}|{lamStr}|{freqStr}|{guideStr}"
+    name = f"{arcStr1}:{arcStr2}:{lamStr}:{freqStr}:{guideStr}"
     return name
 
 def createState(runNumber,isLite,hrn='none'):
