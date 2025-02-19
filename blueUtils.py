@@ -135,7 +135,7 @@ def exportData(exportFormats=['gsa','xye','csv'],latestOnly=True,gsaInstPrm=True
                             latestOnly,
                             gsaInstPrm)
 
-def propagateDifcal(refRunNumber,isLite,propagate=False):
+def propagateDifcal(refRunNumber,isLite=True,propagate=False):
 
     #This will accept a reference Run number, determine a list of all existing 
     # states with equivalent detector positions propagate and their (diff) calibration status
@@ -206,7 +206,7 @@ def reduce(runNumber,
                keepUnfocussed=False,
                lambdaCrop=True, #temporarily needed until SNAPRed can do this during reduction
                emptyTrash=True, #remove temporary mantid workspaces at the end of reduction
-               export=['gsas','xye','ascii'], #file formats to export to. If empty, no export 
+            #    export=['gsas','xye','ascii'], #file formats to export to. If empty, no export 
                cisMode=False):
 
     from mantid import config
@@ -358,7 +358,7 @@ def reduce(runNumber,
                  
           - WARNING: NO DIFFRACTION CALIBRATION FOUND. TO PROCEED EITHER:
               1. RUN A DIFFRACTION CALIBRATION OR 
-              2. SET "continueNoDifCal = True" TO PROCEED WITH DEFAULT GEOMETRY
+              2. SET "continueNoDifcal = True" TO PROCEED WITH DEFAULT GEOMETRY
 
             """)
         assert False
