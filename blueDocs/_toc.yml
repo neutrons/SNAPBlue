@@ -10,3 +10,12 @@ chapters:
 - file: exportData
 - file: propagateDifcal
 - file: indexStates
+- file: SNAPStateMgr
+- file: stateDef
+- file: checkStateExists
+- file: checkCalibrationStatus
+- file: printCalibrationHome
+- file: availableStates
+- file: pullStateDict
+- file: autoStateName
+- file: createState

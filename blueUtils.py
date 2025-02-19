@@ -104,17 +104,31 @@ def indexStates(isLite=True):
             calStatus = "UNCALIB"
 
         desc = ssm.autoStateName(stateDict)
-        nDifcal = difcal['numberCalibrations'] 
-        nNrmcal = nrmcal['numberCalibrations'] 
+        nDifcal = difcal['numberCalibrations']
+
+        if difcal['latestCalibration'] != "never":
+
+            latestDifcalRun = difcal['mostRecentCalib']['runNumber']
+        else:
+            latestDifcalRun = ""
+
+        nNrmcal = nrmcal['numberCalibrations']
+
+        if nrmcal['latestCalibration'] != "never":
+            latestNrmcalRun = nrmcal['mostRecentCalib']['runNumber']
+        else:
+            latestNrmcalRun = ""
 
         outputString = (f"{stateID}|{desc}|"
-                        f" {calStatus} |     {nDifcal}     |    {nNrmcal}      |"
-                        )
+                        f" {calStatus} |"
+                        f"     {nDifcal}     | {latestDifcalRun.rjust(6)} |"
+                        f"     {nNrmcal}     | {latestNrmcalRun.rjust(6)} |"
+                            )
         statuses.append(calStatus) 
         outputStrings.append(outputString)
 
     #output in order of calibration status...
-    print("\n StateID        | Desc.                   | Status  |No. difcals|No. nrmcals|")
+    print("\n StateID        | Desc.                   | Status  |No. difcals| latest |No. nrmcals| latest |")
     for i,string in enumerate(outputStrings):
         if statuses[i] == "UNCALIB":
             print(string) 

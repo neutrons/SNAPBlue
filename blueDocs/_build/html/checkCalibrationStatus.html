@@ -7,7 +7,9 @@
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Search - SNAPBlue docs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>checkCalibrationStatus &#8212; SNAPBlue docs</title>
   
   
   
@@ -57,12 +59,11 @@
     <script src="_static/design-tabs.js"></script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script async="async" src="_static/sphinx-thebe.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'search';</script>
-  <script src="_static/searchtools.js"></script>
-  <script src="_static/language_data.js"></script>
-  <script src="searchindex.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'checkCalibrationStatus';</script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="#" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="printCalibrationHome" href="printCalibrationHome.html" />
+    <link rel="prev" title="checkStateExists" href="checkStateExists.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -94,7 +95,7 @@
     <div class="search-button__overlay"></div>
     <div class="search-button__search-container">
 <form class="bd-search d-flex align-items-center"
-      action="#"
+      action="search.html"
       method="get">
   <i class="fa-solid fa-magnifying-glass"></i>
   <input type="search"
@@ -124,8 +125,6 @@
     <div class="bd-container__inner bd-page-width">
       
       
-      
-        
       
       <div class="bd-sidebar-primary bd-sidebar">
         
@@ -182,7 +181,7 @@
                 </a>
             </li>
         </ul>
-        <ul class="nav bd-sidenav">
+        <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="setup.html">Set up</a></li>
 <li class="toctree-l1"><a class="reference internal" href="blueUtils.html">blueUtils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reduce.html"><code class="docutils literal notranslate"><span class="pre">reduce</span></code></a></li>
@@ -192,7 +191,7 @@
 <li class="toctree-l1"><a class="reference internal" href="SNAPStateMgr.html">SNAPStateMgr</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stateDef.html"><code class="docutils literal notranslate"><span class="pre">stateDef</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="checkStateExists.html"><code class="docutils literal notranslate"><span class="pre">checkStateExists</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="checkCalibrationStatus.html"><code class="docutils literal notranslate"><span class="pre">checkCalibrationStatus</span></code></a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">checkCalibrationStatus</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="printCalibrationHome.html"><code class="docutils literal notranslate"><span class="pre">printCalibrationHome</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="availableStates.html"><code class="docutils literal notranslate"><span class="pre">availableStates</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="pullStateDict.html"><code class="docutils literal notranslate"><span class="pre">pullStateDict</span></code></a></li>
@@ -269,7 +268,7 @@
       
       
       
-      <li><a href="https://github.com/mguthriem/snapBlue/issues/new?title=Issue%20on%20page%20%2Fsearch.html&body=Your%20issue%20content%20here." target="_blank"
+      <li><a href="https://github.com/mguthriem/snapBlue/issues/new?title=Issue%20on%20page%20%2FcheckCalibrationStatus.html&body=Your%20issue%20content%20here." target="_blank"
    class="btn btn-sm btn-source-issues-button dropdown-item"
    title="Open an issue"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -281,6 +280,54 @@
   </span>
 <span class="btn__text-container">Open issue</span>
 </a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/checkCalibrationStatus.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
 </li>
       
   </ul>
@@ -331,42 +378,100 @@ document.write(`
 </div>
               
               
-  <div class="bd-search-container">
-    <h1>Search</h1>
-    <noscript>
-      <div class="admonition error">
-        <p class="admonition-title">Error</p>
-        <p>Please activate JavaScript to enable the search functionality.</p>
-      </div>
-    </noscript>
-    
-<form class="bd-search d-flex align-items-center"
-      action="#"
-      method="get">
-  <i class="fa-solid fa-magnifying-glass"></i>
-  <input type="search"
-         class="form-control"
-         name="q"
-         id="search-input"
-         placeholder="Search this book..."
-         aria-label="Search this book..."
-         autocomplete="off"
-         autocorrect="off"
-         autocapitalize="off"
-         spellcheck="false"/>
-  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
-</form>
-    <div id="search-results"></div>
-  </div>
-  <script>
-    // Activate the search field on page load
-    let searchInput = document.querySelector("form.bd-search input");
-    if (searchInput) {
-        searchInput.focus();
-        searchInput.select();
-        console.log("[PST]: Set focus on search field.");
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>checkCalibrationStatus</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="checkcalibrationstatus">
+<h1><code class="docutils literal notranslate"><span class="pre">checkCalibrationStatus</span></code><a class="headerlink" href="#checkcalibrationstatus" title="Permalink to this heading">#</a></h1>
+<p>This function requires three arguments:</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">stateID</span></code>: which state to check the calibration status of</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">isLite</span></code>: whether to check lite or native calibration status</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">calType</span></code>: one of two strings: “difcal” or “normcal” to specify whether diffraction or normalisation calibration is to be checked</p></li>
+</ol>
+<p>It returns a dictionary with full information regarding the requested calibration status</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">SNAPStateMgr</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ssm</span>
+
+<span class="n">isLite</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">calDict</span> <span class="o">=</span> <span class="n">ssm</span><span class="o">.</span><span class="n">checkCalibrationStatus</span><span class="p">(</span><span class="s2">&quot;3c7b8c841d10a16b&quot;</span><span class="p">,</span><span class="n">isLite</span><span class="p">,</span><span class="s2">&quot;difcal&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">calDict</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;calibIndex&quot;</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="s2">&quot;:&quot;</span><span class="p">,</span><span class="n">calDict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Calibration Index entries:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">calibEntry</span> <span class="ow">in</span> <span class="n">calDict</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">key2</span> <span class="ow">in</span> <span class="n">calibEntry</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">key2</span><span class="p">,</span><span class="s2">&quot;:&quot;</span><span class="p">,</span><span class="n">calibEntry</span><span class="p">[</span><span class="n">key2</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>returns</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">stateID</span> <span class="p">:</span> <span class="mi">3</span><span class="n">c7b8c841d10a16b</span>
+<span class="n">calibrationType</span> <span class="p">:</span> <span class="n">difcal</span>
+<span class="n">isLite</span> <span class="p">:</span> <span class="kc">True</span>
+<span class="n">isCalibrated</span> <span class="p">:</span> <span class="kc">True</span>
+<span class="n">numberCalibrations</span> <span class="p">:</span> <span class="mi">1</span>
+<span class="n">latestCalibration</span> <span class="p">:</span> <span class="mi">2025</span><span class="o">-</span><span class="mi">02</span><span class="o">-</span><span class="mi">17</span> <span class="mi">14</span><span class="p">:</span><span class="mi">31</span><span class="p">:</span><span class="mi">11</span>
+<span class="n">calibRuns</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;64437&#39;</span><span class="p">]</span>
+<span class="n">indexPath</span> <span class="p">:</span> <span class="o">/</span><span class="n">SNS</span><span class="o">/</span><span class="n">SNAP</span><span class="o">/</span><span class="n">shared</span><span class="o">/</span><span class="n">Calibration_testing</span><span class="o">/</span><span class="n">Powder</span><span class="o">/</span><span class="mi">3</span><span class="n">c7b8c841d10a16b</span><span class="o">/</span><span class="n">lite</span><span class="o">/</span><span class="n">diffraction</span><span class="o">/</span><span class="n">CalibrationIndex</span><span class="o">.</span><span class="n">json</span>
+
+<span class="n">Calibration</span> <span class="n">Index</span> <span class="n">entries</span><span class="p">:</span>
+
+<span class="n">version</span> <span class="p">:</span> <span class="mi">0</span>
+<span class="n">runNumber</span> <span class="p">:</span> <span class="mi">64437</span>
+<span class="n">useLiteMode</span> <span class="p">:</span> <span class="kc">True</span>
+<span class="n">appliesTo</span> <span class="p">:</span> <span class="o">&gt;=</span><span class="mi">0</span>
+<span class="n">comments</span> <span class="p">:</span> <span class="n">The</span> <span class="n">default</span> <span class="n">configuration</span> <span class="n">when</span> <span class="n">loading</span> <span class="n">StateConfig</span> <span class="k">if</span> <span class="n">none</span> <span class="n">other</span> <span class="ow">is</span> <span class="n">found</span>
+<span class="n">author</span> <span class="p">:</span> <span class="n">SNAPRed</span> <span class="n">Internal</span>
+<span class="n">timestamp</span> <span class="p">:</span> <span class="mf">1739820536.8264458</span>
+<span class="n">version</span> <span class="p">:</span> <span class="mi">1</span>
+<span class="n">runNumber</span> <span class="p">:</span> <span class="mi">64437</span>
+<span class="n">useLiteMode</span> <span class="p">:</span> <span class="kc">True</span>
+<span class="n">appliesTo</span> <span class="p">:</span> <span class="o">&gt;=</span><span class="mi">0</span>
+<span class="n">comments</span> <span class="p">:</span> <span class="n">test</span>
+<span class="n">author</span> <span class="p">:</span> <span class="n">C</span> <span class="n">Ridley</span>
+<span class="n">timestamp</span> <span class="p">:</span> <span class="mf">1739820671.918172</span>
+<span class="n">mostRecentCalib</span> <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;runNumber&#39;</span><span class="p">:</span> <span class="s1">&#39;64437&#39;</span><span class="p">,</span> <span class="s1">&#39;useLiteMode&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;appliesTo&#39;</span><span class="p">:</span> <span class="s1">&#39;&gt;=0&#39;</span><span class="p">,</span> <span class="s1">&#39;comments&#39;</span><span class="p">:</span> <span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="s1">&#39;author&#39;</span><span class="p">:</span> <span class="s1">&#39;C Ridley&#39;</span><span class="p">,</span> <span class="s1">&#39;timestamp&#39;</span><span class="p">:</span> <span class="mf">1739820671.918172</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>note that <code class="docutils literal notranslate"><span class="pre">calDict[&quot;calibIndex&quot;]</span></code> is a list of dictionaries, one for each calibration that exists in the index.</p>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
     }
-  </script>
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
 
               
               
@@ -375,6 +480,24 @@ document.write(`
                 <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
+    <a class="left-prev"
+       href="checkStateExists.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">checkStateExists</span></code></p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="printCalibrationHome.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title"><code class="docutils literal notranslate"><span class="pre">printCalibrationHome</span></code></p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
 </div>
                 </footer>
               
