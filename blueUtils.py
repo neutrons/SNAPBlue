@@ -148,6 +148,39 @@ def exportData(exportFormats=['gsa','xye','csv'],latestOnly=True,gsaInstPrm=True
     exportTools.reducedRuns(exportFormats,
                             latestOnly,
                             gsaInstPrm)
+    
+def confirmIPTS(ipts,comment="SNAPRed/Blue", subNum=1, redType="Scripts"):
+
+    import subprocess
+
+    #TODO: input validation!
+
+    
+    execArg = [
+        "/SNS/SNAP/shared/Malcolm/devel/confirm-data",
+        "SNAP",
+        f"{ipts}",
+        f"{subNum}",
+        f"{redType}",
+        "-c",
+        f"{comment}",
+        "-s",
+        "Yes"
+    ]
+    # execArg = ['/SNS/SNAP/shared/Malcolm/devel/confirm-data', 
+    #            'SNAP', 
+    #            '34952', 
+    #            '1', 
+    #            'Scripts', 
+    #            '-c', 
+    #            'Gremlin', 
+    #            '-s', 
+    #            'Yes']
+    print(execArg)
+    subprocess.run(execArg,
+                   capture_output=True,
+                   check=True,
+                   shell=False) 
 
 def propagateDifcal(refRunNumber,isLite=True,propagate=False):
 
