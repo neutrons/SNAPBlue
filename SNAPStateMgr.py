@@ -137,19 +137,28 @@ def checkCalibrationStatus(stateID,isLite,calType):
     calStatus["mostRecentCalib"] = calIndex[mostRecentCalib] #dict for most recent calibration
     return calStatus
 
-def detectorConfig(stateDict):
+def detectorConfig(stateDict,includeGuideStatus):
 
     #returns a unique ID for a given detector config. It only cares about
     #detector angles
+    #
+    #added optional flight-tube/guide status to definition of config
 
     import hashlib
 
     # print("detectorConfig:",stateDict)
 
-    detectorDict = {
-            "vdet_arc1" : stateDict["vdet_arc1"],
-            "vdet_arc2" : stateDict["vdet_arc2"]}
-        
+    if includeGuideStatus:
+        detectorDict = {
+                "vdet_arc1" : stateDict["vdet_arc1"],
+                "vdet_arc2" : stateDict["vdet_arc2"],
+                "Pos" : stateDict["Pos"]}
+    else:
+        detectorDict = {
+                "vdet_arc1" : stateDict["vdet_arc1"],
+                "vdet_arc2" : stateDict["vdet_arc2"]}
+
+
     hasher = hashlib.shake_256()
     decodedKey = json.dumps(detectorDict).encode('utf-8')
     hasher.update(decodedKey)

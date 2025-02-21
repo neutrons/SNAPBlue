@@ -155,6 +155,19 @@ def confirmIPTS(ipts,comment="SNAPRed/Blue", subNum=1, redType="Scripts"):
 
     #TODO: input validation!
 
+    #validate redType
+    allowedRedTypes = ["Scripts","CIS","Auto",""]
+    if redType not in allowedRedTypes:
+        print(f"ERROR: {redType} is not a supported option for redType parameters")
+        return
+    #check case
+    if redType.lower() == "scripts":
+        redType = "Scripts"
+    if redType.lower() == "cis":
+        redType = "CIS"
+    if redType.lower() == "auto":
+        redType = "Auto"
+
     
     execArg = [
         "/SNS/SNAP/shared/Malcolm/devel/confirm-data",
@@ -182,7 +195,7 @@ def confirmIPTS(ipts,comment="SNAPRed/Blue", subNum=1, redType="Scripts"):
                    check=True,
                    shell=False) 
 
-def propagateDifcal(refRunNumber,isLite=True,propagate=False):
+def propagateDifcal(refRunNumber,isLite=True,propagate=False,includeGuideStatus=True):
 
     #This will accept a reference Run number, determine a list of all existing 
     # states with equivalent detector positions propagate and their (diff) calibration status
@@ -191,7 +204,7 @@ def propagateDifcal(refRunNumber,isLite=True,propagate=False):
     # calibration
  
     refStateID,refStateDict = ssm.stateDef(refRunNumber)
-    refDetConfig = ssm.detectorConfig(refStateDict)
+    refDetConfig = ssm.detectorConfig(refStateDict,includeGuideStatus)
 
     # check diffraction calibration status of reference run
     refCalStatus = ssm.checkCalibrationStatus(refStateID,isLite,"difcal")
@@ -219,7 +232,7 @@ Origin calibration info
     for stateID in ssm.availableStates():
         if stateID != refStateID:
             stateDict = ssm.pullStateDict(stateID) ##
-            detConfig = ssm.detectorConfig(stateDict)
+            detConfig = ssm.detectorConfig(stateDict,includeGuideStatus)
             if detConfig == refDetConfig:
                 calStatus = ssm.checkCalibrationStatus(stateID,isLite,"difcal")
                 toPropagateCal.append(calStatus)
