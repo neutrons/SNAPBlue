@@ -171,6 +171,20 @@ class reductionGroup:
 
         self.objectDict = redObjects
 
+def convertToQ():
+
+    allWorkspaces = mtd.getObjectNames()
+
+    
+    for ws in allWorkspaces:
+        red = redObject(ws,[])
+        if red.isReducedDataWorkspace:
+
+            outName = f"reduced_qsp_{red.pixelGroup}_{red.runNumber}_{red.timeStamp}"
+            ConvertUnits(InputWorkspace=red.wsName,
+                        OutputWorkspace=outName,
+                        Target="MomentumTransfer")
+
 def reducedRuns(exportFormats,latestOnly=True,gsaInstPrm=True):
 
     #generates a list of reductionGroups. Each of these has a .runNumber attribute

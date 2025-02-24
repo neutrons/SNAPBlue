@@ -260,7 +260,8 @@ def reduce(runNumber,
                emptyTrash=True, #remove temporary mantid workspaces at the end of reduction
             #    export=['gsas','xye','ascii'], #file formats to export to. If empty, no export 
                cisMode=False,
-               singlePixelGroup=None):
+               singlePixelGroup=None,
+               qsp=False):
 
     from mantid import config
 
@@ -755,6 +756,9 @@ with {len(pgs.pixelGroupingParameters)} subGroup(s)
             for dirt in dirty:
                 if dirt in ws:
                     DeleteWorkspace(ws)
+
+    if qsp:
+        exportTools.convertToQ()
 
     # for par in instrumentState:
     #     print(par)
