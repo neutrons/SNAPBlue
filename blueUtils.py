@@ -3,6 +3,7 @@ import yaml
 from mantid.simpleapi import *
 from mantid.kernel import PhysicalConstants
 import numpy as np
+import matplotlib.pyplot as plt
 import json
 import importlib
 import SNAPStateMgr as ssm
@@ -246,6 +247,42 @@ Origin calibration info
     else:
         print("\nPropagatation of calibration was not requested")
         
+
+def autoMask(inputWorkspace,maskType="PE",plotOn=True):
+
+    import maskUtils as mut
+    importlib.reload(mut)
+
+    if maskType == "PE":
+
+        # convert to image and make mask
+        slice = mut.sliceImage(inputWorkspace) #need workspace name here.
+
+        slice.combineMasks=True
+        mut.maskGrid(slice,gridWidth=0)
+        mut.liLee(slice)
+        print(f"{slice.percentMasked:.2f} pixels masked")
+
+        if plotOn:
+        #show  mask
+            maskedImage = slice.image
+            #mantid plots masks as the the maxi,mum of colour scale, so need to grab this
+            zmax = np.max(maskedImage)
+            for indx,val in np.ndenumerate(slice.mask):
+                # print(indx,val)
+                if val:
+                    maskedImage[indx] = zmax
+
+            figName = "masked"
+            figContent = maskedImage
+            fig, ax = plt.subplots()
+            ax.set_title(figName)
+            ax.imshow(figContent)
+            fig.show()
+
+        # #convert mask back to workspace
+        a = mut.mask2mantid(slice,inputWorkspace,"MaskWorkspace_99")
+
 
 def reduce(runNumber,
                sampleEnv='none',
