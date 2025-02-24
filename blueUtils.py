@@ -180,15 +180,7 @@ def confirmIPTS(ipts,comment="SNAPRed/Blue", subNum=1, redType="Scripts"):
         "-s",
         "Yes"
     ]
-    # execArg = ['/SNS/SNAP/shared/Malcolm/devel/confirm-data', 
-    #            'SNAP', 
-    #            '34952', 
-    #            '1', 
-    #            'Scripts', 
-    #            '-c', 
-    #            'Gremlin', 
-    #            '-s', 
-    #            'Yes']
+
     print(execArg)
     subprocess.run(execArg,
                    capture_output=True,
@@ -267,7 +259,8 @@ def reduce(runNumber,
                lambdaCrop=True, #temporarily needed until SNAPRed can do this during reduction
                emptyTrash=True, #remove temporary mantid workspaces at the end of reduction
             #    export=['gsas','xye','ascii'], #file formats to export to. If empty, no export 
-               cisMode=False):
+               cisMode=False,
+               singlePixelGroup=None):
 
     from mantid import config
 
@@ -352,8 +345,6 @@ def reduce(runNumber,
     reductionService = ReductionService()
     timestamp = reductionService.getUniqueTimestamp()
 
-    
-
     reductionRequest = ReductionRequest(
         runNumber=runNumber,
         useLiteMode=useLiteMode,
@@ -364,17 +355,26 @@ def reduce(runNumber,
         convertUnitsTo=convertUnitsTo,
         artificialNormalizationIngredients=artificialNormalizationIngredients
     )
-    
-
-    
 
     reductionService.validateReduction(reductionRequest)
 
-    
-
-    # 1. load grouping workspaces from the state folder  TODO: how to init state?
+    # 1. load default grouping workspaces from the state folder  TODO: how to init state?
     groupings = reductionService.fetchReductionGroupings(reductionRequest)
-    reductionRequest.focusGroups = groupings["focusGroups"]
+
+    # allow selection of singlePixelGroup
+
+    if singlePixelGroup is None:
+        reductionRequest.focusGroups = groupings["focusGroups"]
+    else:
+        reductionRequest.focusGroups = []
+        for focGroup in groupings["focusGroups"]:
+            if singlePixelGroup.lower()==focGroup.name.lower():
+                print(f"Setting single focus group: {focGroup.name}")
+                reductionRequest.focusGroups.append(focGroup)
+
+
+    print("request",reductionRequest.focusGroups)
+
     # 2. Load Calibration (error out if it doesnt exist, comment out if continue anyway)
     # 3. Load Normalization (error out if it doesnt exist, comment out if continue anyway)
     # 3. Load the run data (lite or native)
