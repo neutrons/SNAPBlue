@@ -1809,15 +1809,6 @@ packages:
   purls: []
   size: 69544
   timestamp: 1739569648873
-- pypi: .
-  name: examplepyapp
-  version: 0.2.0.dev149+d202502252123
-  sha256: a614694681974ef3760e60f6cd0a3ec890dee0b06001b43c64631c8f7a31aa6b
-  requires_dist:
-  - bm3d-streak-removal>=0.2.0,<0.3
-  - pytest-playwright>=0.7.0,<0.8
-  requires_python: '>=3.10'
-  editable: true
 - conda: https://conda.anaconda.org/conda-forge/noarch/exceptiongroup-1.2.2-pyhd8ed1ab_1.conda
   sha256: cbde2c64ec317118fc06b223c5fd87c8a680255e7348dd60e7b292d2e103e701
   md5: a16662747cdeb9abbac74d0057cc976e
@@ -6177,6 +6168,15 @@ packages:
   - pkg:pypi/six?source=hash-mapping
   size: 16385
   timestamp: 1733381032766
+- pypi: .
+  name: snapblue
+  version: 0.2.0.dev35+d202503042100
+  sha256: 801b6cae57be2dc29af8ba324a66aa3796a8484bc963f1a14fe4c8cefb6446c3
+  requires_dist:
+  - bm3d-streak-removal>=0.2.0,<0.3
+  - pytest-playwright>=0.7.0,<0.8
+  requires_python: '>=3.10'
+  editable: true
 - conda: https://conda.anaconda.org/conda-forge/noarch/sniffio-1.3.1-pyhd8ed1ab_1.conda
   sha256: c2248418c310bdd1719b186796ae50a8a77ce555228b6acd32768e2543a15012
   md5: bf7a226e58dfb8346c70df36065d86c9
