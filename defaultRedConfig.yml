@@ -1,0 +1,9 @@
+defaultUnfocussedWorkspaceUnits: dSpacing
+keepUnfocussed: false
+pixelMasks: []
+useLiteMode: true
+artificialNorm:
+  smoothingParameter: 0.5
+  decreaseParameter: true
+  lss: true
+  
