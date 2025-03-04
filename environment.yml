@@ -1,6 +1,9 @@
 name: SNAPBlue
 channels:
   - conda-forge
+  - mantid/label/nightly
+  - mantid-ornl
+  - mantid-ornl/label/rc
   - neutrons/label/rc
 dependencies:
   - snapred>=1.1.0rc4
