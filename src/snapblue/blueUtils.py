@@ -6,9 +6,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import json
 import importlib
-import SNAPStateMgr as ssm
+import snapblue.SNAPStateMgr as ssm
 importlib.reload(ssm)
-import SNAPExportTools as exportTools
+import snapblue.SNAPExportTools as exportTools
 importlib.reload(exportTools)
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 # SNAPRed imports
@@ -250,7 +250,7 @@ Origin calibration info
 
 def autoMask(inputWorkspace,maskType="PE",plotOn=True):
 
-    import maskUtils as mut
+    import snapblue.maskUtils as mut
     importlib.reload(mut)
 
     if maskType == "PE":

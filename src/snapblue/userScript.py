@@ -2,7 +2,7 @@ import sys
 import time
 import importlib
 sys.path.append("/SNS/SNAP/shared/code/SNAPBlue")
-import blueUtils as blue
+import snapblue.blueUtils as blue
 importlib.reload(blue)
 from mantid import config
 config.setLogLevel(3, quiet=True)

@@ -8,7 +8,7 @@ from mantid.simpleapi import *
 import datetime
 import json
 
-import SNAPStateMgr as ssm
+import snapblue.SNAPStateMgr as ssm
 
 # TODO: get rid of link to SNAPTools
 # sys.path.append("/SNS/SNAP/shared/Malcolm/code/SNAPRedScripted")
