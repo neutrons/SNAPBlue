@@ -6,10 +6,7 @@ requires-python = ">=3.10"
 license = { text = "MIT" }
 keywords = ["neutrons", "example", "python"]
 readme = "README.md"
-dependencies = [ 
-  "snapred == 1.1.0rc4",
-  "bm3d-streak-removal>=0.2.0,<0.3", 
-  "pytest-playwright>=0.7.0,<0.8"]
+dependencies = []
     # PyPI dependencies
 
 [project.urls]
@@ -73,11 +70,17 @@ select = ["A", "ARG","ASYNC","BLE","C90", "E", "F", "I", "N", "UP032", "W"]
 
 # Pixi configuration
 [tool.pixi.project]
-channels = ["conda-forge", "mantid/label/nightly", "mantid-ornl", "mantid-ornl/label/rc", "neutrons/label/rc", "mantid/label/main", "neutrons/label/main"]
-platforms = ["linux-64", "osx-arm64"]  # add additional platforms as needed
+authors = ["Michael Walsh <walshmm@ornl.gov>"]
+channels = ["conda-forge", "mantid/label/nightly", "mantid-ornl", "mantid-ornl/label/rc", "neutrons/label/rc"]
+name = "SNAPBlue"
+platforms = ["linux-64"]
+version = "0.1.0"
+
 
 [tool.pixi.pypi-dependencies]
 snapblue = { path = ".", editable = true }
+bm3d-streak-removal = "*"
+pytest-playwright = "*"
 
 [tool.pixi.tasks]
 # PyPi packaging tasks
@@ -100,24 +103,27 @@ test = { cmd = "pytest", description = "Run the tests" }  # pytest config above 
 clean-all = { description = "Clean all build artifacts", depends-on = ["clean-pypi", "clean-conda", "clean-docs"] }
 
 [tool.pixi.dependencies]
-python = "==3.10"
 snapred = ">=1.1.0rc4"
-versioningit = ">=3.1.2,<4"
-numpy = ">=2.2.3,<3"
-pandas = ">=2.2.3,<3"
-matplotlib = ">=3.10.0,<4"
-jupyterlab = ">=4.3.5,<5"
-ipympl = ">=0.9.6,<0.10"
-pre-commit = ">=4.1.0,<5"
-libmamba = ">=1.5.12,<2"
-libarchive = ">=3.7.7,<4"
-anaconda-client = ">=1.12.3,<2"
-boa = ">=0.17.0,<0.18"
+python = ">=3.8"
+versioningit = "*"
+numpy = "*"
+pandas = "*"
+matplotlib = "*"
+jupyterlab = "*"
+ipympl = "*"
+pre-commit = "*"
+libmamba = "*"
+libarchive = "*"
+anaconda-client = "*"
+boa = "*"
 conda-build = "<4"
-conda-verify = ">=3.4.2,<4"
-python-build = ">=1.2.2.post1,<2"
-twine = ">=6.1.0,<7"
-myst-parser = ">=4.0.1,<5"
-pytest = ">=8.3.4,<9"
-pytest-cov = ">=6.0.0,<7"
-pytest-xdist = ">=3.6.1,<4"
+conda-verify = "*"
+python-build = "*"
+twine = "*"
+sphinx = "*"
+sphinx_rtd_theme = "*"
+myst-parser = "*"
+pytest = "*"
+pytest-cov = "*"
+pytest-xdist = "*"
+pip = "*"
