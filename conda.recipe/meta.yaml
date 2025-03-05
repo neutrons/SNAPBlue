@@ -19,7 +19,7 @@ source:
   path: ..
 
 build:
-  linux-64: python
+  noarch: python
   number: {{ build_number }}
   string: py{{py}}
   script: {{ PYTHON }} -m pip install . --no-deps --ignore-installed -vvv

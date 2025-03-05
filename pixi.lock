@@ -5883,8 +5883,8 @@ packages:
   timestamp: 1733381032766
 - pypi: .
   name: snapblue
-  version: 0.1.0.dev2+d202503051706
-  sha256: 965b443d41bd64c7455ca2e7f03d9268ea8d85974315c1630f1356a9a5054294
+  version: 0.1.0.dev4+d202503051852
+  sha256: ca3e2b63597f5c2ad98af82eb90ad0627420dd7adf6547da078243d9511caa37
   requires_python: '>=3.10'
   editable: true
 - conda: https://conda.anaconda.org/neutrons/label/rc/noarch/snapred-1.1.0rc4-py310.tar.bz2
