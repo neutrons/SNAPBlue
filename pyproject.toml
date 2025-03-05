@@ -6,7 +6,13 @@ requires-python = ">=3.10"
 license = { text = "MIT" }
 keywords = ["neutrons", "example", "python"]
 readme = "README.md"
-dependencies = [ "bm3d-streak-removal>=0.2.0,<0.3", "pytest-playwright>=0.7.0,<0.8"]  # PyPI dependencies
+dependencies = [ 
+  "mantidworkbench >= 6.11.0.5rc1",
+  "snapred >= 1.1.0rc4",
+  "pyoncat ~= 1.6"
+  "bm3d-streak-removal>=0.2.0,<0.3", 
+  "pytest-playwright>=0.7.0,<0.8"]
+    # PyPI dependencies
 
 [project.urls]
 homepage = "https://github.com/neutrons/python_project_template/"  # if no homepage, use repo url
