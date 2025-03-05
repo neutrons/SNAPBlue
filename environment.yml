@@ -1,7 +1,12 @@
-name: mypythonapp
+name: SNAPBlue
 channels:
   - conda-forge
+  - mantid/label/nightly
+  - mantid-ornl
+  - mantid-ornl/label/rc
+  - neutrons/label/rc
 dependencies:
+  - snapred>=1.1.0rc4
   # -- Runtime dependencies
   # base: list all base dependencies here
   - python>=3.8  # please specify the minimum version of python here
