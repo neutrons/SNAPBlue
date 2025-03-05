@@ -37,6 +37,8 @@ requirements:
 
   run:
     - python
+    - mantidworkbench
+    - snapred
 
 about:
   home: {{ url }}

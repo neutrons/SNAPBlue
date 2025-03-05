@@ -30,7 +30,7 @@ jobs:
           cd conda.recipe
           echo "versioningit $(versioningit ../)"
           # build the package
-          VERSION=$(versioningit ../) conda mambabuild --channel conda-forge --output-folder . .
+          VERSION=$(versioningit ../) conda mambabuild --channel conda-forge --channel mantid/label/nightly --channel mantid-ornl --channel mantid-ornl/label/rc --channel neutrons/label/rc --output-folder . .
           conda verify noarch/snapblue*.tar.bz2
       - name: upload conda package to anaconda
         shell: bash -l {0}
