@@ -410,7 +410,7 @@ class CalibrationManagerModel:
         self,
         donorRunNumber,
         isLite: bool = True,
-        includeGuideStatus: bool = False,
+        includeGuideStatus: bool = True,
     ) -> Dict[str, Any]:
         """Preview donor/recipient details for propagation without writing files.
 
@@ -486,7 +486,7 @@ class CalibrationManagerModel:
         self,
         donorRunNumber,
         isLite: bool = True,
-        includeGuideStatus: bool = False,
+        includeGuideStatus: bool = True,
     ) -> Dict[str, Any]:
         """Execute propagation from UI after preview/confirmation."""
 

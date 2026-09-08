@@ -1516,7 +1516,7 @@ def _write_propagation_log(entry: dict) -> None:
     except Exception as e:
         printWarning(f"WARNING: failed to write propagation log entry: {e}")
 
-def propagateDifcal(donorRunNumber,isLite=True,propagate=False,includeGuideStatus=False):
+def propagateDifcal(donorRunNumber,isLite=True,propagate=False,includeGuideStatus=True):
 
     #This will accept a reference Run number, determine a list of all existing 
     # states with equivalent detector positions
