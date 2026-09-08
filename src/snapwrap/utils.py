@@ -2028,6 +2028,8 @@ def reduce(runNumber,
 
     #hook: background and attenuation correction
 
+    hooks = None
+
     if backgroundWSName is not None or attenuationWSName is not None: # do if either is true
 
         # print(f"backgroundWSName is: {backgroundWSName}")
@@ -2035,17 +2037,25 @@ def reduce(runNumber,
 
         print("\nHOOK WILL BE APPLIED!!!!\n")
         #define hook
-        hook = Hook(func=BackgroundAttenuationCorrection,
+        hook = Hook(func=HookCollection.BackgroundAttenuationCorrection,
                     attenuationWSName = attenuationWSName, #TODO: correctly manage ws names 
                     backgroundWSName= backgroundWSName) #TODO: correctly manage ws names
 
-        emptyHook = Hook(func=doNothingHook) #dummy doesn't do anything for now
+        emptyHook = Hook(func=HookCollection.doNothingHook) #dummy doesn't do anything for now
         hooks = {
             "PostPreprocessReductionRecipe" : [hook, emptyHook]
         }
 
     if len(binMaskList) > 0:
         # currently doesn't do anything, just runs empty hook in PreprocessReductionRecipe
+
+        if hooks is not None:
+            # HookManager consumes one list entry per firing of a given hook point,
+            # so two independent hook sets cannot share PostPreprocessReductionRecipe.
+            return _abort(
+                "bin masking cannot currently be combined with background/attenuation "
+                "correction: both use the PostPreprocessReductionRecipe hook."
+            )
 
         print("\nBIN MASK HOOK WILL BE APPLIED!!!!\n")
 
@@ -2055,9 +2065,6 @@ def reduce(runNumber,
         hooks = {
             "PostPreprocessReductionRecipe" : [binMaskHook,binMaskHook]
         }
-        
-    else:
-        hooks = None
 
     # pre-process option to specify focusGroupAllowList
 
