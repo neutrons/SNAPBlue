@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 from unittest.mock import MagicMock
 
+from snapwrap import snapStateMgr as ssm
 from snapwrap import utils
 
 
@@ -127,3 +128,76 @@ def test_propagate_dry_run_and_success_log_outcomes(tmp_path, monkeypatch):
     assert lines[-1]["recipientStateID"] == "recipient-state"
     assert lines[-1]["newVersion"] == 2
     mock_ssm.copyDifcal.assert_called_once()
+
+
+# ── guide-status constraint on detector-config matching ───────────────────
+#
+# propagateDifcal treats two states as compatible when their detectorConfig
+# hashes match. With includeGuideStatus False that hash covers only the
+# detector arm angles, so states differing solely in optics/guide position
+# were considered interchangeable and calibrations were copied between them.
+# These exercise the real ssm.detectorConfig -- no mocks -- because the
+# mocked propagation tests above stub it out and cannot see this behaviour.
+
+
+def _stateDict(opticsPos=2, exitSlit=0):
+    return {
+        "det_arc1": -50.442,
+        "det_arc2": 89.989,
+        "BL3:Mot:OpticsPos:Pos": opticsPos,
+        "BL3:Mot:OpticsPos:ExitSlit": exitSlit,
+    }
+
+
+def test_detector_config_ignores_optics_pos_without_guide_status():
+    """Without guide status the two SNAP optics positions collide."""
+
+    posOne = ssm.detectorConfig(_stateDict(opticsPos=1), False)
+    posTwo = ssm.detectorConfig(_stateDict(opticsPos=2), False)
+
+    assert posOne == posTwo
+
+
+def test_detector_config_separates_optics_pos_with_guide_status():
+    """With guide status they are distinct, so propagation is refused."""
+
+    posOne = ssm.detectorConfig(_stateDict(opticsPos=1), True)
+    posTwo = ssm.detectorConfig(_stateDict(opticsPos=2), True)
+
+    assert posOne != posTwo
+
+
+def test_detector_config_separates_exit_slit_with_guide_status():
+    slitOpen = ssm.detectorConfig(_stateDict(exitSlit=0), True)
+    slitShut = ssm.detectorConfig(_stateDict(exitSlit=1), True)
+
+    assert slitOpen != slitShut
+
+
+def test_detector_config_still_matches_identical_guide_config():
+    """Guide status must not break propagation between genuinely equal states."""
+
+    left = ssm.detectorConfig(_stateDict(), True)
+    right = ssm.detectorConfig(_stateDict(), True)
+
+    assert left == right
+
+
+def test_detector_config_arm_angle_tolerance_survives_guide_status():
+    """The 0.5 deg arm rounding still applies when guide status is included."""
+
+    near = dict(_stateDict())
+    near["det_arc1"] = -50.442
+    far = dict(_stateDict())
+    far["det_arc1"] = -50.501  # rounds to the same half degree
+
+    assert ssm.detectorConfig(near, True) == ssm.detectorConfig(far, True)
+
+
+def test_propagate_difcal_includes_guide_status_by_default():
+    """Regression guard: the default must stay True."""
+
+    import inspect
+
+    default = inspect.signature(utils.propagateDifcal).parameters["includeGuideStatus"].default
+    assert default is True
