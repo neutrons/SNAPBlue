@@ -201,3 +201,20 @@ def test_propagate_difcal_includes_guide_status_by_default():
 
     default = inspect.signature(utils.propagateDifcal).parameters["includeGuideStatus"].default
     assert default is True
+
+
+def test_calibration_manager_propagation_defaults_match_wrap():
+    """The GUI path must not quietly re-enable cross-guide propagation.
+
+    previewPropagation and executePropagation carry their own defaults and
+    pass the value through explicitly, so a False here would override the
+    propagateDifcal default no matter what utils says.
+    """
+
+    import inspect
+
+    from snapwrap.calibrationManager.model import CalibrationManagerModel
+
+    for name in ("previewPropagation", "executePropagation"):
+        sig = inspect.signature(getattr(CalibrationManagerModel, name))
+        assert sig.parameters["includeGuideStatus"].default is True, name

@@ -777,7 +777,7 @@ class TestPropagationPreviewExecute:
         assert result["ok"] is True
         assert result["executed"] is True
         mock_propagate.assert_called_once_with(
-            "68926", isLite=True, propagate=True, includeGuideStatus=False,
+            "68926", isLite=True, propagate=True, includeGuideStatus=True,
         )
 
     def test_execute_does_not_call_propagate_when_blocked(self):
